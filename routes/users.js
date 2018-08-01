@@ -8,7 +8,7 @@ var connection = mysql.createConnection({
     port: config.database.port,
     user: config.database.user,
     password: config.database.password,
-    database: config.database.dbname,
+    database: config.database.dbname
 });
 connection.connect();
 /* GET users listing. */
