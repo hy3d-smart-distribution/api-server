@@ -12,12 +12,22 @@ var connection = mysql.createConnection({
 });
 connection.connect();
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-    var sql = 'select count(*) as count from product';
+router.get('/join', function(req, res, next) {
+    res.render('join');
+});
+router.post('/join',function (req, res, next) {
+    let body = req.body;
+    let email = body.email;
+    let name = body.name;
+    let passwd = body.password;
+
+
+});
+router.get('/getusers', function(req, res, next) {
+    let sql = 'select count(*) as count from product';
     connection.query(sql, function (err, results) {
         if (err) console.log(err);
         res.json(results);
     });
 });
-
 module.exports = router;
