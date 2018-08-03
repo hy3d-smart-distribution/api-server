@@ -9,7 +9,7 @@ var debug = require('debug')('hy3d-node:server');
 var http = require('http');
 
 
-var env = 'development';
+  var env = 'development';
 var config = require('../config')[env];
 var port = normalizePort(config.server.port);
 app.set('port', port);

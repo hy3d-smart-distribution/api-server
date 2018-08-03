@@ -9,7 +9,8 @@ var LocalStrategy = require('passport-local').Strategy;
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/user');
 var modelRouter = require('./routes/model');
-
+var env = 'development';
+var config = require('./config')[env];
 var app = express();
 
 // view engine setup
@@ -21,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.set('jwt-secret', config.secret);
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
 app.use('/model', modelRouter);
