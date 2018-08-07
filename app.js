@@ -4,7 +4,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
 var session = require('express-session');
 var flash = require('connect-flash');
 
@@ -28,13 +27,12 @@ app.set('jwt-secret', config.secret);
 
 
 
-
 app.use(session({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: true
 }));
-
+require('./hy3dAuth')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());

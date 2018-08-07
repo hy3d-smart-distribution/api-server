@@ -5,7 +5,6 @@ var app = express();
 
 
 router.get('/', function(req, res, next) {
-
   var file = __dirname + '/../public/models/asd.bundle';
   res.download(file);
 });

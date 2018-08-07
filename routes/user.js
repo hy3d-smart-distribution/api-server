@@ -15,6 +15,7 @@ let connection = mysql.createConnection({
     database: config.database.dbname
 });
 const sha256 = x => crypto.createHash('sha256').update(x, 'utf8').digest('hex');
+
 connection.connect();
 /* GET users listing. */
 
