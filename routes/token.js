@@ -5,12 +5,9 @@ let mysql = require('mysql');
 let env = 'development';
 let config = require('../config')[env];
 let passport = require('passport');
-let LocalStrategy = require('passport-local').Strategy;
-const passportJWT = require("passport-jwt");
-const JWTStrategy   = passportJWT.Strategy;
-const ExtractJWT = passportJWT.ExtractJwt;
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+let mkdir = require('mkdirp');
 let connection = mysql.createConnection({
     host: config.database.host,
     port: config.database.port,
@@ -30,6 +27,7 @@ router.post('/join', function (req, res, next) {
 
             if (err) {
                 return next(err);}
+            console.log();
             return res.json("success");
         })
     })(req,res,next);
@@ -41,7 +39,7 @@ router.post('/login', function (req, res, next) {
     passport.authenticate('local-login', {session: false}, (err, user, info) => {
         if (err || !user) {
             if(err){
-                return res.status(400).json(info);
+                return res.status(400).json(err);
             }else{
                 return res.status(400).json(info);
             }
@@ -54,8 +52,7 @@ router.post('/login', function (req, res, next) {
             let policy = {expiresIn: 120};
             jwt.sign(info, req.app.get('jwt-secret'),policy, (err, token) => {
                 if (err) console.log(err);
-                tokenToReturn = token;
-                return res.json({email: user.email, token});
+                return res.json({token});
             });
         });
     })(req, res);
@@ -63,11 +60,39 @@ router.post('/login', function (req, res, next) {
 });
 
 router.get('/auth',function (req, res, next) {
-    passport.authenticate('local-jwt', (err, user) => {
+    passport.authenticate('local-jwt', (err, token) => {
 
-        if (err) return next(err); // It is null
-        if (!user) return res.status(403).json("failed");
-        res.status(200).json(user);
+        if (err) return next(err);
+        if (!token) return res.status(403).json("failed");
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+            }
+            res.status(200).json({message : "success"});
+        });
+
+
+    })(req, res, next);
+});
+router.get('/refresh', function (req, res,next) {
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json("failed");
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+            }
+            let policy = {expiresIn: 120};
+            let info = {
+                email : token.email,
+                id : token.id,
+                company_id : token.company_id
+            };
+            jwt.sign(info, req.app.get('jwt-secret'),policy, (err, newtoken) => {
+                if (err) console.log(err);
+                return res.status(200).json({token: newtoken});
+            });
+        });
 
     })(req, res, next);
 });

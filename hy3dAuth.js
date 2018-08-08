@@ -54,8 +54,7 @@ module.exports = function (passport) {
             secretOrKey   : config.secret
         },
         function (jwtPayload, done) {
-            console.log(jwtPayload);
-            return done(null,{message: "success"});
+            return done(null,jwtPayload);
 
         }
     ));
@@ -69,10 +68,10 @@ module.exports = function (passport) {
                 if(rows.length==0){
                     return done(null, false, {message: 'invalid_username'});
                 }else{
-                    let query_2 = connection.query('select email from member where email=? and password = ?',[email, sha256(password)], function (err,rows) {
+                    let query_2 = connection.query('select email, id, company_id from member where email=? and password = ?',[email, sha256(password)], function (err,rows) {
                         if(err) return done(err);
                         if(rows.length){
-                            return done(null,{email: rows[0].email});
+                            return done(null,{email: rows[0].email, id: rows[0].id, company_id: rows[0].company_id});
                         }else{
 
                             return done(null, false, {message: 'invalid_password'});
