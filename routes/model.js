@@ -10,5 +10,8 @@ router.get('/', function(req, res, next) {
   var file = __dirname + '/../public/models/asd.bundle';
   res.download(file);
 });
-
+router.get('/', function(req, res, next) {
+    var file = __dirname + '/../public/models/asd.bundle';
+    res.download(file);
+});
 module.exports = router;

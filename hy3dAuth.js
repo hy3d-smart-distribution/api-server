@@ -32,15 +32,24 @@ module.exports = function (passport) {
             passwordField: 'password',
             passReqToCallback: true
         },function (req, email, password, done) {
+            console.log("local-join");
+            let body = req.body;
             let query_1 = connection.query('select email from member where email=?',[email],function (err,rows) {
+                console.log("q1");
                 if(err) return done(err);
                 if(rows.length){
                     return done(null, false, {message: 'email_inuse'});
                 }else{
-                    let query_2 = connection.query('insert into member(company_id, email, password, name) values(?, ?, ?, ?) ', sql, function (err,rows) {
+                    let query_2 = connection.query('insert into member(company_id, email, password, name) values(?, ?, ?, ?) ',[body.company_id,email,sha256(password),body.name], function (err,rows) {
                         if(err) return done(err);
-                        if(rows.length)
-                            return done(null,{email: email, password: password});
+                        let query_3 = connection.query('select id from member where email = ?',[email],function (err,rows) {
+                            console.log("q3");
+                            if(err) return done(err);
+                            if(rows.length){
+                                return done(null,{id : rows[0].id});
+                            }
+                        });
+
                     });
 
                 }
