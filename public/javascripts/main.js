@@ -27,11 +27,12 @@ window.addEventListener('load',function () {
         token: token
     };
 
-    btn_login.addEventListener('click',doLogin.bind(app));
+    app.root.appendChild(app.app_login);
+    btn_login.addEventListener('click',doLogin(app));
 });
 
-function doLogin(){
-        login(this).then(loadPage).catch(function (data) {
+function doLogin(app){
+        login(app).then(loadPage).catch(function (data) {
             console.log(data)
         });
 }
@@ -42,11 +43,15 @@ function login(app) {
         let password = document.querySelector('input[name="password"]');
         let data = JSON.stringify({"email": username.value, "password": password.value});
         console.log(data);
-        oReq.addEventListener("load", function (resolve,reject) {
-            if(this.responseText){
-
+        oReq.addEventListener("load", function () {
+            if(this.status >= 200 && this.status <300){
+                console.log(this.responseText);
+                app.token.key = JSON.parse(this.responseText).token;
+                resolve([app, app.app_upload]);
+            }else{
+                reject(new Error(this.responseText));
             }
-            reject(new Error("Request is failed "));
+
         });
         oReq.open("POST", "/token/login");
         oReq.setRequestHeader('Content-Type', 'application/json');
@@ -54,14 +59,16 @@ function login(app) {
     });
 }
 function getData(app){
-    console.log(this.responseText);
-    app.token.key = JSON.parse(this.responseText).token;
-    resolve(app, app.root.upload);
+
 }
-function loadPage(app,page) {
+function loadPage(data) {
+    let app = data[0];
+    let page = data[1];
     return new Promise(function (resolve, reject) {
-        app.root.removeChild();
-        app.root.insertBefore(page);
+        while (app.root.firstChild) {
+            app.root.removeChild(app.root.firstChild);
+        }
+        app.root.appendChild(page);
         resolve("success");
     });
 }
