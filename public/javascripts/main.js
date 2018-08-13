@@ -42,7 +42,6 @@ function login(app) {
         let username = document.querySelector('input[name="email"]');
         let password = document.querySelector('input[name="password"]');
         let data = JSON.stringify({"email": username.value, "password": password.value});
-        console.log(data);
         oReq.addEventListener("load", function () {
             if(this.status >= 200 && this.status <300){
                 console.log(this.responseText);
