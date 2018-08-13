@@ -3,19 +3,19 @@
  */
 window.addEventListener('load',function () {
     //auth
-    let token = {key: ""};
+    var token = {key: ""};
 
     //views
-    let root = document.querySelector('#app-root');
-    let app_login = document.querySelector('#app-login');
-    let app_upload = document.querySelector('#app-upload');
+    var root = document.querySelector('#app-root');
+    var app_login = document.querySelector('#app-login');
+    var app_upload = document.querySelector('#app-upload');
 
     //buttons
-    let btn_login = document.querySelector('#btn_login');
-    let btn_upload = document.querySelector('#btn_upload');
-    let btn_upload_click = document.querySelector('#btn_upload_btn');
+    var btn_login = document.querySelector('#btn_login');
+    var btn_upload = document.querySelector('#btn_upload');
+    var btn_upload_click = document.querySelector('#btn_upload_btn');
 
-    let app = {
+    var app = {
         root: root,
         app_login: app_login,
         app_upload: app_upload,
@@ -38,10 +38,10 @@ function doLogin(app){
 }
 function login(app) {
     return new Promise((resolve, reject) => {
-        let oReq = new XMLHttpRequest();
-        let username = document.querySelector('input[name="email"]');
-        let password = document.querySelector('input[name="password"]');
-        let data = JSON.stringify({"email": username.value, "password": password.value});
+        var oReq = new XMLHttpRequest();
+        var username = document.querySelector('input[name="email"]');
+        var password = document.querySelector('input[name="password"]');
+        var data = JSON.stringify({"email": username.value, "password": password.value});
         oReq.addEventListener("load", function () {
             if(this.status >= 200 && this.status <300){
                 console.log(this.responseText);
@@ -61,8 +61,8 @@ function getData(app){
 
 }
 function loadPage(data) {
-    let app = data[0];
-    let page = data[1];
+    var app = data[0];
+    var page = data[1];
     return new Promise(function (resolve, reject) {
         while (app.root.firstChild) {
             app.root.removeChild(app.root.firstChild);
