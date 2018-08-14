@@ -12,6 +12,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/user');
 var modelRouter = require('./routes/model');
 var tokenRouter = require('./routes/token');
+var galleryRouter = require('./routes/gallery');
 var env = 'development';
 var config = require('./config')[env];
 var app = express();
@@ -40,6 +41,7 @@ app.use('/', indexRouter);
 app.use('/user', usersRouter);
 app.use('/model', modelRouter);
 app.use('/token', tokenRouter);
+app.use('/gallery', galleryRouter);
 
 
 // catch 404 and forward to error handler
