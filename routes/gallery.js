@@ -5,7 +5,6 @@ let express = require('express');
 let multer = require('multer');
 let path = require('path');
 let router = express.Router();
-let app = express();
 let env = 'development';
 let config = require('../config')[env];
 let upload = multer({ storage: multer.diskStorage({
