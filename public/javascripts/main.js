@@ -1,6 +1,4 @@
-/**
- * Created by chou6 on 2018-08-09.
- */
+
 window.addEventListener('load',function () {
     //auth
     var token = {key: ""};
