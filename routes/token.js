@@ -22,7 +22,7 @@ connection.connect();
 router.post('/join', function (req, res, next) {
     passport.authenticate('local-join',{session: false},function(err,user,info){
         if(err) res.status(500).json(err);
-        if(!user) return res.status(401).json(info.message);
+        else if(!user) return res.status(401).json(info.message);
         req.logIn(user, function (err) {
             if (err) {
                 console.log(err);

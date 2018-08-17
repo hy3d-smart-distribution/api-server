@@ -41,9 +41,11 @@ module.exports = function (passport) {
                     return done(null, false, {message: 'email_inuse'});
                 }else{
                     let query_2 = connection.query('insert into member(company_id, email, password, name) values(?, ?, ?, ?) ',[body.company_id,email,sha256(password),body.name], function (err,rows) {
-                        if(err) return done(err);
+                        if(err){
+                            return done(err);
+                        }
                         let query_3 = connection.query('select id from member where email = ?',[email],function (err,rows) {
-                            console.log("q3");
+                                console.log("q3");
                             if(err) return done(err);
                             if(rows.length){
                                 return done(null,{id : rows[0].id});

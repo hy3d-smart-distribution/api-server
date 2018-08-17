@@ -4,6 +4,7 @@
 let express = require('express');
 let multer = require('multer');
 let path = require('path');
+let mkdir = require('mkdirp');
 let router = express.Router();
 let env = 'development';
 let config = require('../config')[env];
@@ -17,6 +18,12 @@ let upload = multer({ storage: multer.diskStorage({
     }
 }),});
 router.post('/:userid',upload.single('img'), function(req, res, next) {
+    mkdir('C:/Users/chou6/Desktop/storage/a', function (err) {
+        if (err) console.error(err);
+    });
+    mkdir('C:/Users/chou6/Desktop/storage/a', function (err) {
+        if (err) console.error(err);
+    });
     res.status(201).json({message: "done"});
 
  });
