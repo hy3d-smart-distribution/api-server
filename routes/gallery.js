@@ -5,9 +5,11 @@ let express = require('express');
 let multer = require('multer');
 let path = require('path');
 let mkdir = require('mkdirp');
+const crypto = require('crypto');
 let router = express.Router();
 let env = 'development';
 let config = require('../config')[env];
+const sha256 = x => crypto.createHash('sha256').update(x, 'utf8').digest('hex');
 let upload = multer({ storage: multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, __dirname + '/../public/gallery/'+ req.params.userid + "/");
