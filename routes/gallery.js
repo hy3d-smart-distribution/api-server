@@ -11,7 +11,7 @@ let env = 'development';
 let config = require('../config')[env];
 const crypto = require('crypto');
 const sha256 = x => crypto.createHash('sha256').update(x, 'utf8').digest('hex');
-let upload = multer({
+let upload = multer ({
     storage: multer.diskStorage({
         destination: function (req, file, cb) {
             let hash = sha256(file.originalname + new Date().valueOf());
@@ -103,8 +103,16 @@ let connection = mysql.createConnection({
     password: config.database.password,
     database: config.database.dbname
 });
-router.post('/', upload.single('img'), function (req, res, next) {
-    res.status(201).json({message: "done"});
+router.post('/', function (req, res, next) {
+    let store = upload.single('img');
+    store(req, res, function (err) {
+        if (err) {
+            res.status(500).json({message: "error occured"});
+            return
+        }
+        res.status(200).json({message: "success"});
+    });
+
 
 });
 router.get('/:userid', function (req, res, next) {
