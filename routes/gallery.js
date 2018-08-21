@@ -2,11 +2,11 @@
  * Created by chou6 on 2018-08-14.
  */
 let express = require('express');
+let router = express.Router();
 let multer = require('multer');
 let path = require('path');
 let mkdir = require('mkdirp');
 let mysql = require('mysql');
-let router = express.Router();
 let env = 'development';
 let config = require('../config')[env];
 const crypto = require('crypto');
@@ -21,6 +21,7 @@ let upload = multer({
             let save_path = "/" + fir + "/" + sec + "/" + trd + "/";
             let diskpath;
             let body = req.body;
+
             connection.beginTransaction(function (err) {
                 if (err) {
                     throw err;
@@ -45,7 +46,6 @@ let upload = multer({
                             }
                             diskpath = rows[0].path;
                             fileId = rows[0].id;
-                            console.log(body.id);
                             let register_gallery = connection.query('insert into gallery(member_id, file_id, lat, lng) values(?,?,?,?)',
                                 [body.id, fileId, 52.482, 192.424],
                                 function (err, rows) {
