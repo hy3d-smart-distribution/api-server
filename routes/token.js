@@ -23,16 +23,19 @@ router.post('/join', function (req, res, next) {
     passport.authenticate('local-join',{session: false},function(err,user,info){
         if(err) res.status(500).json(err);
         else if(!user) return res.status(401).json(info.message);
-        req.logIn(user, function (err) {
-            if (err) {
-                console.log(err);
-                return res.status(400).json({message: "error"});
-            }
-            mkdir('C:/Users/chou6/Desktop/storage/'+ user.id, function (err) {
-                if (err) console.error(err);
-            });
-            return res.json("success");
-        })
+        else{
+            req.logIn(user, function (err) {
+                if (err) {
+                    console.log(err);
+                    return res.status(400).json({message: "error"});
+                }
+                mkdir('C:/Users/chou6/Desktop/storage/'+ user.id, function (err) {
+                    if (err) console.error(err);
+                });
+                return res.json("success");
+            })
+        }
+
     })(req,res,next);
 });
 
