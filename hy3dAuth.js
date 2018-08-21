@@ -35,7 +35,6 @@ module.exports = function (passport) {
             console.log("local-join");
             let body = req.body;
             let query_1 = connection.query('select email from member where email=?',[email],function (err,rows) {
-                console.log("q1");
                 if(err) return done(err);
                 if(rows.length){
                     return done(null, false, {message: 'email_inuse'});
@@ -45,7 +44,6 @@ module.exports = function (passport) {
                             return done(err);
                         }
                         let query_3 = connection.query('select id from member where email = ?',[email],function (err,rows) {
-                                console.log("q3");
                             if(err) return done(err);
                             if(rows.length){
                                 return done(null,{id : rows[0].id});
