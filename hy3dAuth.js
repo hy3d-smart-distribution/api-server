@@ -1,6 +1,7 @@
 
 let mysql = require('mysql');
 let LocalStrategy = require('passport-local').Strategy;
+let CustomStrategy = require('passport-custom');
 let passportJWT = require("passport-jwt");
 let JWTStrategy   = passportJWT.Strategy;
 let ExtractJWT = passportJWT.ExtractJwt;
@@ -8,6 +9,8 @@ let env = 'development';
 let config = require('./config')[env];
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const {OAuth2Client} = require('google-auth-library');
+
 let connection = mysql.createConnection({
     host: config.database.host,
     port: config.database.port,
@@ -27,6 +30,14 @@ module.exports = function (passport) {
         console.log("deserialize");
         done(null,user);
     });
+    passport.use('google-auth', new CustomStrategy(
+        function (req, done) {
+            let body = req.body;
+            console.log(body);
+            done(null,{id: "1"});
+
+        }
+    ));
     passport.use('local-join', new LocalStrategy({
             usernameField: 'email',
             passwordField: 'password',
@@ -67,20 +78,23 @@ module.exports = function (passport) {
 
         }
     ));
+
     passport.use('local-login', new LocalStrategy({
             usernameField: 'email',
             passwordField: 'password',
             passReqToCallback: true
         },function (req, email, password, done) {
-            let query_1 = connection.query('select email from member where email=?',[email],function (err,rows) {
+            let find_user = connection.query('select email from member where email=?',[email],function (err,rows) {
                 if(err) return done(err);
                 if(rows.length==0){
                     return done(null, false, {message: 'invalid_username'});
                 }else{
-                    let query_2 = connection.query('select email, id, company_id from member where email=? and password = ?',[email, sha256(password)], function (err,rows) {
+                    let query_2 = connection.query('select email, id, company_id, privilege ' +
+                        'from member where email=? and password = ?',[email, sha256(password)], function (err,rows) {
                         if(err) return done(err);
                         if(rows.length){
-                            return done(null,{email: rows[0].email, id: rows[0].id, company_id: rows[0].company_id});
+                            return done(null,{email: rows[0].email, id: rows[0].id, company_id: rows[0].company_id,
+                            privilege: rows[0].privilege});
                         }else{
 
                             return done(null, false, {message: 'invalid_password'});

@@ -10,6 +10,7 @@ let mysql = require('mysql');
 let env = 'development';
 let config = require('../config')[env];
 const crypto = require('crypto');
+let passport = require('passport');
 const sha256 = x => crypto.createHash('sha256').update(x, 'utf8').digest('hex');
 let upload = multer ({
     storage: multer.diskStorage({
@@ -104,18 +105,36 @@ let connection = mysql.createConnection({
     database: config.database.dbname
 });
 router.post('/', function (req, res, next) {
-    let store = upload.single('img');
-    store(req, res, function (err) {
-        if (err) {
-            res.status(500).json({message: "error occured"});
-            return
-        }
-        res.status(200).json({message: "success"});
-    });
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json("failed");
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+                return;
+            }else{
+                if(token.privilege == 1){
+                    let store = upload.single('img');
+                    store(req, res, function (err) {
+                        if (err) {
+                            return  res.status(500).json({message: "error occured"});;
+                        }
+                        return res.status(200).json({message: "success"});
+                    });
+                }else{
+                    return res.status(400).json({message: "no privilege"});
+                }
+            }
+
+        });
+
+    })(req, res, next);
+
 
 
 });
 router.get('/:userid', function (req, res, next) {
+
 
 });
 module.exports = router;

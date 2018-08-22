@@ -55,7 +55,7 @@ router.post('/login', function (req, res, next) {
                 res.send(err);
             }
             let info = user;
-            let policy = {expiresIn: 120};
+            let policy = {expiresIn: 300};
             jwt.sign(info, req.app.get('jwt-secret'),policy, (err, token) => {
                 if (err) console.log(err);
                 return res.json({token});
@@ -67,19 +67,37 @@ router.post('/login', function (req, res, next) {
 
 router.get('/auth',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
-
         if (err) return next(err);
         if (!token) return res.status(403).json("failed");
         req.login(token, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
             }
+            console.log(token);
             res.status(200).json({message : "success"});
         });
 
 
     })(req, res, next);
 });
+router.post('/google-auth',function (req, res, next) {
+    passport.authenticate('google-auth', (err, data) => {
+        if (err) return next(err);
+        if (!data) return res.status(403).json("no data");
+        req.login(data, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+            }
+            console.log(data);
+            let a =
+            res.status(200).json({message : sha256('banana')});
+        });
+
+
+    })(req, res, next);
+});
+
+
 router.get('/refresh', function (req, res,next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
@@ -88,7 +106,7 @@ router.get('/refresh', function (req, res,next) {
             if (err) {
                 res.status(500).json(err);
             }
-            let policy = {expiresIn: 120};
+            let policy = {expiresIn: 300};
             let info = {
                 email : token.email,
                 id : token.id,
