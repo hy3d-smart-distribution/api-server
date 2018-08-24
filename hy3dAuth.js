@@ -48,7 +48,7 @@ module.exports = function (passport) {
             let query_1 = connection.query('select email from member where email=?',[email],function (err,rows) {
                 if(err) return done(err);
                 if(rows.length){
-                    return done(null, false, {message: 'email_inuse'});
+                    return done(null, false, {description: 'email_inuse'});
                 }else{
                     let query_2 = connection.query('insert into member(company_id, email, password, name) values(?, ?, ?, ?) ',[body.company_id,email,sha256(password),body.name], function (err,rows) {
                         if(err){
@@ -87,17 +87,17 @@ module.exports = function (passport) {
             let find_user = connection.query('select email from member where email=?',[email],function (err,rows) {
                 if(err) return done(err);
                 if(rows.length==0){
-                    return done(null, false, {message: 'invalid_username'});
+                    return done(null, false, {description: 'invalid_username'});
                 }else{
-                    let query_2 = connection.query('select email, id, company_id, privilege ' +
-                        'from member where email=? and password = ?',[email, sha256(password)], function (err,rows) {
+                    let query_2 = connection.query('select email, member.name  company.name,  privilege ' +
+                        'from member join company on company.id = company_id where email=? and password = ?',[email, sha256(password)], function (err,rows) {
                         if(err) return done(err);
                         if(rows.length){
                             return done(null,{email: rows[0].email, id: rows[0].id, company_id: rows[0].company_id,
                             privilege: rows[0].privilege});
                         }else{
 
-                            return done(null, false, {message: 'invalid_password'});
+                            return done(null, false, {description: 'invalid_password'});
                         }
                     });
 
