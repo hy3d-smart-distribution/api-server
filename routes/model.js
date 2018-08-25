@@ -8,8 +8,6 @@ let env = 'development';
 let config = require('../config')[env];
 const crypto = require('crypto');
 let passport = require('passport');
-let env = 'development';
-let config = require('../config')[env];
 let connection = mysql.createConnection({
     host: config.database.host,
     port: config.database.port,

@@ -101,7 +101,7 @@ router.post('/google-auth',function (req, res, next) {
 router.get('/refresh', function (req, res,next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
-        if (!token) return res.status(403).json("failed");
+        if (!token) return res.status(403).json({result: "error"});
         req.login(token, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
@@ -114,7 +114,7 @@ router.get('/refresh', function (req, res,next) {
             };
             jwt.sign(info, req.app.get('jwt-secret'),policy, (err, newtoken) => {
                 if (err) console.log(err);
-                return res.status(200).json({token: newtoken});
+                return res.status(200).json({result: "success", token: newtoken});
             });
         });
 
