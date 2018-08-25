@@ -47,7 +47,7 @@ router.post('/login', function (req, res, next) {
             if(err){
                 return res.status(400).json(err);
             }else{
-                return res.status(400).json(info);
+                return res.status(400).json({result: "error", description: info.description });
             }
         }
         req.login(user, {session: false}, (err) => {
@@ -58,7 +58,7 @@ router.post('/login', function (req, res, next) {
             let policy = {expiresIn: 300};
             jwt.sign(info, req.app.get('jwt-secret'),policy, (err, token) => {
                 if (err) console.log(err);
-                return res.json({token});
+                return res.json({result: "success",description: "success" ,token,user});
             });
         });
     })(req, res);
@@ -68,15 +68,15 @@ router.post('/login', function (req, res, next) {
 router.get('/auth',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
-        if (!token) return res.status(403).json("failed");
+        if (!token) return res.status(403).json({result:"errror"});
         req.login(token, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
             }
             console.log(token);
-            res.status(200).json({message : "success"});
-        });
-
+            res.status(200).json({result : "success"})
+        ;
+    });
 
     })(req, res, next);
 });

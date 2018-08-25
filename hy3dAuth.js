@@ -1,9 +1,8 @@
-
 let mysql = require('mysql');
 let LocalStrategy = require('passport-local').Strategy;
 let CustomStrategy = require('passport-custom');
 let passportJWT = require("passport-jwt");
-let JWTStrategy   = passportJWT.Strategy;
+let JWTStrategy = passportJWT.Strategy;
 let ExtractJWT = passportJWT.ExtractJwt;
 let env = 'development';
 let config = require('./config')[env];
@@ -24,17 +23,17 @@ connection.connect();
 module.exports = function (passport) {
     passport.serializeUser(function (user, done) {
         console.log("serialize");
-        done(null,user);
+        done(null, user);
     });
-    passport.deserializeUser(function (user,done) {
+    passport.deserializeUser(function (user, done) {
         console.log("deserialize");
-        done(null,user);
+        done(null, user);
     });
     passport.use('google-auth', new CustomStrategy(
         function (req, done) {
             let body = req.body;
             console.log(body);
-            done(null,{id: "1"});
+            done(null, {id: "1"});
 
         }
     ));
@@ -42,22 +41,21 @@ module.exports = function (passport) {
             usernameField: 'email',
             passwordField: 'password',
             passReqToCallback: true
-        },function (req, email, password, done) {
-            console.log("local-join");
+        }, function (req, email, password, done) {
             let body = req.body;
-            let query_1 = connection.query('select email from member where email=?',[email],function (err,rows) {
-                if(err) return done(err);
-                if(rows.length){
+            let query_1 = connection.query('select email from member where email=?', [email], function (err, rows) {
+                if (err) return done(err);
+                if (rows.length) {
                     return done(null, false, {description: 'email_inuse'});
-                }else{
-                    let query_2 = connection.query('insert into member(company_id, email, password, name) values(?, ?, ?, ?) ',[body.company_id,email,sha256(password),body.name], function (err,rows) {
-                        if(err){
+                } else {
+                    let query_2 = connection.query('insert into member(company_id, email, password, name) values(?, ?, ?, ?) ', [body.company_id, email, sha256(password), body.name], function (err, rows) {
+                        if (err) {
                             return done(err);
                         }
-                        let query_3 = connection.query('select id from member where email = ?',[email],function (err,rows) {
-                            if(err) return done(err);
-                            if(rows.length){
-                                return done(null,{id : rows[0].id});
+                        let query_3 = connection.query('select id from member where email = ?', [email], function (err, rows) {
+                            if (err) return done(err);
+                            if (rows.length) {
+                                return done(null, {id: rows[0].id});
                             }
                         });
 
@@ -67,14 +65,13 @@ module.exports = function (passport) {
             });
 
         }
-
     ));
-    passport.use('local-jwt',new JWTStrategy({
+    passport.use('local-jwt', new JWTStrategy({
             jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-            secretOrKey   : config.secret
+            secretOrKey: config.secret
         },
         function (jwtPayload, done) {
-            return done(null,jwtPayload);
+            return done(null, jwtPayload);
 
         }
     ));
@@ -83,29 +80,30 @@ module.exports = function (passport) {
             usernameField: 'email',
             passwordField: 'password',
             passReqToCallback: true
-        },function (req, email, password, done) {
-            let find_user = connection.query('select email from member where email=?',[email],function (err,rows) {
-                if(err) return done(err);
-                if(rows.length==0){
+        }, function (req, email, password, done) {
+            let find_user = connection.query('select email from member where email=?', [email], function (err, rows) {
+                if (err) return done(err);
+                if (rows.length == 0) {
                     return done(null, false, {description: 'invalid_username'});
-                }else{
-                    let query_2 = connection.query('select email, member.name  company.name,  privilege ' +
-                        'from member join company on company.id = company_id where email=? and password = ?',[email, sha256(password)], function (err,rows) {
-                        if(err) return done(err);
-                        if(rows.length){
-                            return done(null,{email: rows[0].email, id: rows[0].id, company_id: rows[0].company_id,
-                            privilege: rows[0].privilege});
-                        }else{
+                } else {
+                    let query_2 = connection.query('select email, member.name as name, company.name as company ' +
+                        'from member join company on company.id = company_id where email= ? and password = ?', [email, sha256(password)],
+                        function (err, rows) {
+                            if (err) return done(err);
+                            if (rows.length) {
+                                return done(null, {
+                                    email: rows[0].email, name: rows[0].name, company: rows[0].company,
+                                });
+                            } else {
 
-                            return done(null, false, {description: 'invalid_password'});
-                        }
-                    });
+                                return done(null, false, {description: 'invalid_password'});
+                            }
+                        });
 
                 }
             });
 
         }
-
     ));
 };
 
