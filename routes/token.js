@@ -55,10 +55,15 @@ router.post('/login', function (req, res, next) {
                 res.send(err);
             }
             let info = user;
-            let policy = {expiresIn: 300};
+            let user_info = {
+                email: user.email,
+                name: user.name,
+                company: user.company
+            };
+            let policy = {expiresIn: "1h"};
             jwt.sign(info, req.app.get('jwt-secret'),policy, (err, token) => {
                 if (err) console.log(err);
-                return res.json({result: "success",description: "success" ,token,user});
+                return res.json({result: "success",description: "success" ,token,user: user_info});
             });
         });
     })(req, res);
@@ -68,7 +73,7 @@ router.post('/login', function (req, res, next) {
 router.get('/auth',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
-        if (!token) return res.status(403).json({result:"errror"});
+        if (!token) return res.status(403).json({result:"error"});
         req.login(token, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
@@ -106,11 +111,13 @@ router.get('/refresh', function (req, res,next) {
             if (err) {
                 res.status(500).json(err);
             }
-            let policy = {expiresIn: 300};
+            let policy = {expiresIn: "1h"};
             let info = {
+                user_id: token.id,
+                company_id : token.company_id,
                 email : token.email,
-                id : token.id,
-                company_id : token.company_id
+                name : token.name,
+                company : token.company
             };
             jwt.sign(info, req.app.get('jwt-secret'),policy, (err, newtoken) => {
                 if (err) console.log(err);

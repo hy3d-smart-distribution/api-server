@@ -113,18 +113,14 @@ router.post('/', function (req, res, next) {
                 res.status(500).json(err);
                 return;
             }else{
-                if(token.privilege == 1){
-                    let store = upload.single('img');
-                    store(req, res, function (err) {
-                        if (err) {
-                            //
-                            return  res.status(500).json({message: "error occured"});;
-                        }
-                        return res.status(200).json({message: "success"});
-                    });
-                }else{
-                    return res.status(400).json({message: "no privilege"});
-                }
+                let store = upload.single('img');
+                store(req, res, function (err) {
+                    if (err) {
+                        //
+                        return  res.status(500).json({message: "error occured"});;
+                    }
+                    return res.status(200).json({message: "success"});
+                });
             }
 
         });

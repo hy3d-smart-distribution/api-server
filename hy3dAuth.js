@@ -10,6 +10,9 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const {OAuth2Client} = require('google-auth-library');
 
+
+
+
 let connection = mysql.createConnection({
     host: config.database.host,
     port: config.database.port,
@@ -86,13 +89,13 @@ module.exports = function (passport) {
                 if (rows.length == 0) {
                     return done(null, false, {description: 'invalid_username'});
                 } else {
-                    let query_2 = connection.query('select email, member.name as name, company.name as company ' +
+                    let query_2 = connection.query('select member.id as userId ,company.id as companyId, email, member.name as name, company.name as company ' +
                         'from member join company on company.id = company_id where email= ? and password = ?', [email, sha256(password)],
                         function (err, rows) {
                             if (err) return done(err);
                             if (rows.length) {
                                 return done(null, {
-                                    email: rows[0].email, name: rows[0].name, company: rows[0].company,
+                                    user_id: rows[0].userId,company_id: rows[0].companyId, email: rows[0].email, name: rows[0].name, company: rows[0].company,
                                 });
                             } else {
 
