@@ -10,7 +10,7 @@ var flash = require('connect-flash');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/user');
-var modelRouter = require('./routes/model');
+var bundleRouter = require('./routes/bundle');
 var tokenRouter = require('./routes/token');
 var galleryRouter = require('./routes/gallery');
 var env = 'development';
@@ -39,7 +39,7 @@ app.use(passport.session());
 app.use(flash());
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
-app.use('/model', modelRouter);
+app.use('/bundle', bundleRouter);
 app.use('/token', tokenRouter);
 app.use('/gallery', galleryRouter);
 
