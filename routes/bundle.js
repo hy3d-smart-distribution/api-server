@@ -186,6 +186,7 @@ router.post('/upload', function(req, res, next) {
 });
 
 router.get('/get/:hash',function (req, res, next) {
+
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result:"token_not_vaild"});
