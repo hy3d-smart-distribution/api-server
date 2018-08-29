@@ -184,7 +184,8 @@ router.post('/upload', function(req, res, next) {
     })(req, res, next);
 
 });
-router.get('/get/:fileName',function (req, res, next) {
+
+router.get('/get/:hash',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result:"token_not_vaild"});
@@ -192,9 +193,25 @@ router.get('/get/:fileName',function (req, res, next) {
             if (err) {
                 res.status(500).json(err);
             }
-            console.log(token);
+            var hash = req.params.hash;
+            var find_file_hash = connection.query('select path, file_name from file_info join disk on file_info.id = disk.id',function (err, rows) {
+                if(err){
+                    throw err;
+                }else if(rows.length===0){
+                    res.status(400).json({result : "no_file_exists"});
+                }else{
+                    var diskpath = rows[0].path;
+                    var file_name = rows[0].name;
+                    let fir = hash.substring(0, 2);
+                    let sec = hash.substring(2, 4);
+                    let trd = hash.substring(4, 6);
+                    let save_path = "/" + fir + "/" + sec + "/" + trd + "/";
+                    let finalpath = diskpath + save_path + file_name;
+                    res.download(finalpath, file_name);
+                }
+            });
 
-            res.status(200).json({result : "success"});
+
 
         });
     })(req, res, next);
