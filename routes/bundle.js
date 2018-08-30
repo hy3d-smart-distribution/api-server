@@ -73,7 +73,7 @@ let upload = multer ({
                                             }else if(rows){
                                                 let bundleId = rows[0].id;
                                                 let add_company_list = connection.query('insert into avail_bundle(company_id, bundle_id) values(?,?)',
-                                                    [body.company_id, bundleId],function (err, rows) {
+                                                    [1, bundleId],function (err, rows) {
                                                         if (err) {
                                                             console.log(err);
                                                             connection.rollback(function () {
@@ -168,14 +168,15 @@ router.post('/upload', function(req, res, next) {
                 res.status(500).json(err);
                 return;
             }else{
+                console.log(req.body);
                 var store = upload.single('bundle');
                 store(req, res, function (err) {
 
                     if (err) {
                         console.log(err);
-                        return  res.status(500).json({result: "error"});;
+                        return  res.status(500).json({result: "error"});
                     }
-                    console.log('upload_success');
+                    console.log(req.body);
                     return res.status(200).json({result: "success"});
                 });
             }

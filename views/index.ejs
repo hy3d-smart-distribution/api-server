@@ -1,29 +1,13 @@
 <!DOCTYPE html>
 <html>
-  <head>
+    <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+      <meta name="google-signin-client_id" content="1084321342143-f7fr9uc4qj88k58ks1qcnr0romiqr5md.apps.googleusercontent.com">
   </head>
   <body>
-    <div id="app-root">
-    </div>
-    <div id="hide">
-      <div id="app-login">
-        <div>
-          <label for="email">
-            <input name="email">
-          </label>
-          <label for="password">
-            <input name="password">
-          </label>
-          <button id="btn_login" class="btn" type="button">로그인</button>
-        </div>
-      </div>
-      <div id="app-upload">
-        <button id="btn_upload" class="btn" type="button">파일 업로드</button>
-        <input style="visibility: hidden" type="file" value="파일 업로드">
-      </div>
-    </div>
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
   <script type="text/javascript" src="/javascripts/main.js"></script>
   </body>
 </html>
