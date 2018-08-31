@@ -16,24 +16,31 @@ let connection = mysql.createConnection({
     password: config.database.password,
     database: config.database.dbname
 });
-let upload = multer ({
-    storage: multer.diskStorage({
-        destination: function (req, file, cb) {
-            let hash = sha256(file.originalname + new Date().valueOf());
-            let fir = hash.substring(0, 2);
-            let sec = hash.substring(2, 4);
-            let trd = hash.substring(4, 6);
-            let save_path = "/" + fir + "/" + sec + "/" + trd + "/";
-            let diskpath;
-            let body = req.body;
+let saveStorage  = multer.diskStorage({
+    destination: function (req, file, cb) {
+        let hash = sha256(file.originalname + new Date().valueOf());
+        let fir = hash.substring(0, 2);
+        let sec = hash.substring(2, 4);
+        let trd = hash.substring(4, 6);
+        let save_path = "/" + fir + "/" + sec + "/" + trd + "/";
+        let diskpath;
 
-            connection.beginTransaction(function (err) {
-                if (err) {
-                    throw err;
-                }
+        connection.beginTransaction(function (err) {
+            if (err) {
+                throw err;
+            }
 
-                let insert_before_upload = connection.query('insert into file_info(hash,file_name) values(?,?)',
-                    [hash, file.originalname], function (err, rows) {
+            let insert_before_upload = connection.query('insert into file_info(hash,file_name) values(?,?)',
+                [hash, file.originalname], function (err, rows) {
+                    if (err) {
+                        console.log(err);
+                        connection.rollback(function () {
+                            console.error('rollback error');
+                            throw err;
+                        });
+                    }
+                    let find_save_path = connection.query('select file_info.id,hash,path from file_info ' +
+                        'join disk on disk_id = disk.id where hash = ?', [hash], function (err, rows) {
                         if (err) {
                             console.log(err);
                             connection.rollback(function () {
@@ -41,98 +48,90 @@ let upload = multer ({
                                 throw err;
                             });
                         }
-                        console.log('insert_before_upload');
-                        let find_save_path = connection.query('select file_info.id,hash,path from file_info ' +
-                            'join disk on disk_id = disk.id where hash = ?', [hash], function (err, rows) {
-                            if (err) {
-                                console.log(err);
-                                connection.rollback(function () {
-                                    console.error('rollback error');
-                                    throw err;
-                                });
-                            }
-                            diskpath = rows[0].path;
-                            fileId = rows[0].id;
-                            let register_bundle = connection.query('insert into bundle(file_id) values(?)',
-                                [fileId],
-                                function (err, rows) {
-                                    if (err) {
-                                        console.log(err);
-                                        connection.rollback(function () {
-                                            console.error('rollback error');
-                                            throw err;
-                                        });
-                                    }else if(rows){
-                                        let get_bundle_id = connection.query('select id from bundle where file_id = ?',[fileId],function (err, rows) {
-                                            if (err) {
-                                                console.log(err);
-                                                connection.rollback(function () {
-                                                    console.error('rollback error');
-                                                    throw err;
-                                                });
-                                            }else if(rows){
-                                                let bundleId = rows[0].id;
-                                                let add_company_list = connection.query('insert into avail_bundle(company_id, bundle_id) values(?,?)',
-                                                    [1, bundleId],function (err, rows) {
-                                                        if (err) {
-                                                            console.log(err);
-                                                            connection.rollback(function () {
-                                                                console.error('rollback error');
-                                                                throw err;
-                                                            });
-                                                        }else{
-                                                            connection.commit(function (err) {
-                                                                if (err) {
-                                                                    console.error(err);
-                                                                    connection.rollback(function () {
-                                                                        console.error('rollback error');
-                                                                        throw err;
-                                                                    });
-                                                                }// if err
-                                                                let finalpath = diskpath + save_path;
-                                                                mkdir(diskpath + save_path, function (err) {
-                                                                    if (err) throw(err);
-                                                                    req.body.filename = hash;
-                                                                    cb(null, diskpath + save_path);
+                        diskpath = rows[0].path;
+                        fileId = rows[0].id;
+                        let register_bundle = connection.query('insert into bundle(file_id) values(?)',
+                            [fileId],
+                            function (err, rows) {
+                                if (err) {
+                                    console.log(err);
+                                    connection.rollback(function () {
+                                        console.error('rollback error');
+                                        throw err;
+                                    });
+                                }else if(rows){
+                                    let get_bundle_id = connection.query('select id from bundle where file_id = ?',[fileId],function (err, rows) {
+                                        if (err) {
+                                            console.log(err);
+                                            connection.rollback(function () {
+                                                console.error('rollback error');
+                                                throw err;
+                                            });
+                                        }else if(rows){
+                                            let bundleId = rows[0].id;
+                                            let add_company_list = connection.query('insert into avail_bundle(company_id, bundle_id) values(?,?)',
+                                                [req.body.company_id, bundleId],function (err, rows) {
+                                                    if (err) {
+                                                        console.log(err);
+                                                        connection.rollback(function () {
+                                                            console.error('rollback error');
+                                                            throw err;
+                                                        });
+                                                    }else{
+                                                        connection.commit(function (err) {
+                                                            if (err) {
+                                                                console.error(err);
+                                                                connection.rollback(function () {
+                                                                    console.error('rollback error');
+                                                                    throw err;
                                                                 });
-
+                                                            }// if err
+                                                            let finalpath = diskpath + save_path;
+                                                            mkdir(diskpath + save_path, function (err) {
+                                                                if (err) throw(err);
+                                                                req.body.filename = hash;
+                                                                cb(null, diskpath + save_path);
                                                             });
-                                                        }
-                                                    });
-                                            }
-                                            else{
-                                                connection.rollback(function () {
-                                                    console.error('rollback error');
-                                                    throw err;
+
+                                                        });
+                                                    }
                                                 });
-                                            }
-                                        });
-                                    }
+                                        }
+                                        else{
+                                            connection.rollback(function () {
+                                                console.error('rollback error');
+                                                throw err;
+                                            });
+                                        }
+                                    });
+                                }
 
 
 
 
-                                });
+                            });
 
-
-                        });
 
                     });
 
+                });
 
-            });
 
-        },
-        filename: function (req, file, cb) {
-            let fileExtension = file.originalname.split('.')[1];
-            if(fileExtension === undefined){
-                cb(null, req.body.filename);
-            }else{
-                cb(null, req.body.filename + '.' + fileExtension);
-            }
+        });
 
+    },
+    filename: function (req, file, cb) {
+        let fileExtension = file.originalname.split('.')[1];
+        if(fileExtension === undefined){
+            cb(null, req.body.filename);
+        }else{
+            cb(null, req.body.filename + '.' + fileExtension);
         }
-    }),
+
+    }
+});
+let upload = multer ({
+    storage: saveStorage,
 });
 
 router.get('/list', function(req, res, next) {
@@ -168,7 +167,6 @@ router.post('/upload', function(req, res, next) {
                 res.status(500).json(err);
                 return;
             }else{
-                console.log(req.body);
                 var store = upload.single('bundle');
                 store(req, res, function (err) {
 
@@ -176,7 +174,6 @@ router.post('/upload', function(req, res, next) {
                         console.log(err);
                         return  res.status(500).json({result: "error"});
                     }
-                    console.log(req.body);
                     return res.status(200).json({result: "success"});
                 });
             }
