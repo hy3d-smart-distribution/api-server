@@ -41,6 +41,7 @@ router.post('/join', function (req, res, next) {
 
 
 router.post('/login', function (req, res, next) {
+    console.log(req.body);
     const {username, password} = req.body;
     passport.authenticate('local-login', {session: false}, (err, user, info) => {
         if (err || !user) {

@@ -22,6 +22,9 @@ label, input[type="text"]{
   margin-right : 15px;
   cursor: pointer;
 }
+.message{
+  background-color: #b7ff9f;
+}
 #hide{
   display: none;
 }
