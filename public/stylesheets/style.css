@@ -7,9 +7,12 @@ a {
   color: #00B7FF;
 }
 
-label, input[type="text"]{
+label, input{
   display: block;
 
+}
+label{
+  margin-bottom: 10px;
 }
 .btn{
   border: none;
@@ -23,7 +26,15 @@ label, input[type="text"]{
   cursor: pointer;
 }
 .message{
+  padding: 30px 10px;
   background-color: #b7ff9f;
+}
+.center{
+  margin: auto;
+  padding: 20px;
+  min-width: 300px;
+  width: 50%;
+
 }
 #hide{
   display: none;
