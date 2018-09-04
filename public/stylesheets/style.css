@@ -14,7 +14,7 @@ label, input{
 label{
   margin-bottom: 10px;
 }
-input{
+input[type='text'], input[type='password']{
   height: 30px;
 }
 .btn{
@@ -38,6 +38,9 @@ input{
   min-width: 300px;
   width: 50%;
 
+}
+.hidden{
+  visibility: hidden;
 }
 #hide{
   display: none;

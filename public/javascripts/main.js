@@ -3,8 +3,14 @@ window.addEventListener('load', function () {
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
     var message = document.querySelector('#login .message');
+    var btn_upload = document.querySelector('#do_upload');
+    console.log(btn_upload);
+    var file_input = document.querySelector("#upload input[type='file']");
+
+
     var page_login = document.querySelector('#login');
     var page_upload = document.querySelector('#upload');
+
 
 
     var token = "";
@@ -13,13 +19,17 @@ window.addEventListener('load', function () {
         companyList: companyList,
         input_password: input_password,
         btn_login: btn_login,
+        btn_upload: btn_upload,
+        file_input: file_input,
         message: message,
         page_login: page_login,
         page_upload: page_upload
+
     };
 
     input_password.addEventListener('keypress',catchEnter(app));
     btn_login.addEventListener('click', doLogin(app));
+    btn_upload.addEventListener('click',getFile(app));
 });
 function catchEnter(app) {
     return function f(e) {
@@ -63,6 +73,13 @@ function getToken(app) {
 
     }
 }
+function getFile(app) {
+    return function f(e) {
+        app.file_input.click();
+    };
+
+}
+
 
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
