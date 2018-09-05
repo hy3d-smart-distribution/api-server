@@ -21,15 +21,18 @@ window.addEventListener('load', function () {
         btn_login: btn_login,
         btn_upload: btn_upload,
         file_input: file_input,
+        file_data: null,
         message: message,
         page_login: page_login,
-        page_upload: page_upload
+        page_upload: page_upload,
+
 
     };
 
     input_password.addEventListener('keypress',catchEnter(app));
     btn_login.addEventListener('click', doLogin(app));
     btn_upload.addEventListener('click',getFile(app));
+    file_input.addEventListener('chagne',setFileUpload(app));
 });
 function catchEnter(app) {
     return function f(e) {
@@ -78,6 +81,12 @@ function getFile(app) {
         app.file_input.click();
     };
 
+}
+function setFileUpload(app) {
+    return function f(e) {
+        app.file_data = document.querySelector("#upload input[type='file']").files;
+        console.log(app.file_data);
+    };
 }
 
 
