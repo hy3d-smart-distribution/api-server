@@ -3,10 +3,9 @@ window.addEventListener('load', function () {
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
     var message = document.querySelector('#login .message');
-    var btn_upload = document.querySelector('#do_upload');
-    console.log(btn_upload);
+    var btn_getFile = document.querySelector('#get_file');
+    var btn_uploadFile = document.querySelector('#upload_file');
     var file_input = document.querySelector("#upload input[type='file']");
-
 
     var page_login = document.querySelector('#login');
     var page_upload = document.querySelector('#upload');
@@ -19,7 +18,8 @@ window.addEventListener('load', function () {
         companyList: companyList,
         input_password: input_password,
         btn_login: btn_login,
-        btn_upload: btn_upload,
+        btn_getFile: btn_getFile,
+        btn_uploadFile: btn_uploadFile,
         file_input: file_input,
         file_data: null,
         message: message,
@@ -31,7 +31,8 @@ window.addEventListener('load', function () {
 
     input_password.addEventListener('keypress',catchEnter(app));
     btn_login.addEventListener('click', doLogin(app));
-    btn_upload.addEventListener('click',getFile(app));
+    btn_getFile.addEventListener('click',getFile(app));
+    btn_uploadFile.addEventListener('click',uplo);
     file_input.addEventListener('chagne',setFileUpload(app));
 });
 function catchEnter(app) {
@@ -87,6 +88,11 @@ function setFileUpload(app) {
         app.file_data = document.querySelector("#upload input[type='file']").files;
         console.log(app.file_data);
     };
+}
+function uploadFile() {
+    return function f(e) {
+        console.log('uploadFile');
+    }
 }
 
 
