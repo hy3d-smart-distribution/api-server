@@ -32,8 +32,8 @@ window.addEventListener('load', function () {
     input_password.addEventListener('keypress',catchEnter(app));
     btn_login.addEventListener('click', doLogin(app));
     btn_getFile.addEventListener('click',getFile(app));
-    btn_uploadFile.addEventListener('click',uplo);
-    file_input.addEventListener('chagne',setFileUpload(app));
+    btn_uploadFile.addEventListener('click',uploadFile(app));
+    file_input.addEventListener('change',setFileUpload(app));
 });
 function catchEnter(app) {
     return function f(e) {
@@ -47,12 +47,18 @@ function doLogin(app) {
         var id = document.querySelector('#input_id').value;
         var pw = document.querySelector('#input_pw').value;
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost/token/login');
+        xhr.open('POST', 'token/login');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.addEventListener('load', getToken(app));
         xhr.send(JSON.stringify({email: id, password: pw}));
     };
 
+}
+function uploadNotify(app){
+    return function f(e) {
+        var json  =  JSON.parse(this.responseText);
+        console.log(json);
+    }
 }
 function getToken(app) {
     return function f(e) {
@@ -85,13 +91,22 @@ function getFile(app) {
 }
 function setFileUpload(app) {
     return function f(e) {
-        app.file_data = document.querySelector("#upload input[type='file']").files;
+        app.file_data = document.querySelector("#upload input[type='file']").files[0];
         console.log(app.file_data);
     };
 }
-function uploadFile() {
+function uploadFile(app) {
     return function f(e) {
-        console.log('uploadFile');
+        console.log('upload');
+        var data = new FormData();
+        data.append('company_id', "1");
+        data.append('bundle', app.file_data);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'bundle/upload');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+        xhr.addEventListener('load', uploadNotify(app));
+        xhr.send(data);
+
     }
 }
 

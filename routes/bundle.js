@@ -24,7 +24,7 @@ let saveStorage  = multer.diskStorage({
         let trd = hash.substring(4, 6);
         let save_path = "/" + fir + "/" + sec + "/" + trd + "/";
         let diskpath;
-
+        console.log(req.body);
         connection.beginTransaction(function (err) {
             if (err) {
                 throw err;
