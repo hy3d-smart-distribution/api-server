@@ -2,14 +2,13 @@ window.addEventListener('load', function () {
     var companyList = document.querySelector('#companyList');
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
-    var message = document.querySelector('#login .message');
+    var message_login = document.querySelector('#login .message');
+    var message_upload = document.querySelector('#upload .message');
     var btn_getFile = document.querySelector('#get_file');
     var btn_uploadFile = document.querySelector('#upload_file');
     var file_input = document.querySelector("#upload input[type='file']");
-
     var page_login = document.querySelector('#login');
     var page_upload = document.querySelector('#upload');
-
 
 
     var token = "";
@@ -22,7 +21,8 @@ window.addEventListener('load', function () {
         btn_uploadFile: btn_uploadFile,
         file_input: file_input,
         file_data: null,
-        message: message,
+        message_login: message_login,
+        message_upload: message_upload,
         page_login: page_login,
         page_upload: page_upload,
 
@@ -57,29 +57,30 @@ function doLogin(app) {
 function uploadNotify(app){
     return function f(e) {
         var json  =  JSON.parse(this.responseText);
-        console.log(json);
+        app.message_upload.innerHTML = "업로드가 완료되었습니다.";
     }
 }
 function getToken(app) {
     return function f(e) {
         var json  =  JSON.parse(this.responseText);
-        console.log(json);
         var result = json.result;
         var description = json.description;
         if(result==='error'){
             if(description==='invalid_password'){
-                app.message.innerText = '비밀번호가 일치하지 않습니다.';
+                app.message_login.innerText = '비밀번호가 일치하지 않습니다.';
             }
             else if(description==='invalid_username'){
-                app.message.innerText = '존재하지 않는 아이디입니다.';
+                app.message_login.innerText = '존재하지 않는 아이디입니다.';
             }
         }else{
-            app.page_login.style.visibility = 'hidden';
+            if(json.token!==undefined){
+                var token = json.token;
+                app.token = token;
+            }
+            app.page_login.style.display = 'none';
+            app.page_upload.style.display = 'block';
         }
-        if(json.token!==undefined){
-            var token = json.token;
-            app.token = token;
-        }
+
 
     }
 }
@@ -92,6 +93,7 @@ function getFile(app) {
 function setFileUpload(app) {
     return function f(e) {
         app.file_data = document.querySelector("#upload input[type='file']").files[0];
+        app.message_upload.innerHTML='파일명 : ' + app.file_data.name;
         console.log(app.file_data);
     };
 }

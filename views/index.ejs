@@ -26,10 +26,15 @@
       </div>
 
   </div>
-  <div id="upload">
-      <button id="get_file" class="btn">파일 선택</button>
-      <input class="hidden" type="file">
-      <button id="upload_file" class="btn">업로드</button>
+  <div id="upload" style="display: none">
+      <div class="center">
+          <button id="get_file" class="btn">파일 선택</button>
+          <input class="hidden" type="file">
+          <button id="upload_file" class="btn">업로드</button>
+          <div class="message">
+              업로드할 파일을 선택해주세요.
+          </div>
+      </div>
   </div>
 
   <div class="g-signin2" data-onsuccess="onSignIn"></div>
