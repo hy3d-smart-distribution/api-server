@@ -68,34 +68,22 @@ let saveStorage  = multer.diskStorage({
                                                 throw err;
                                             });
                                         }else if(rows){
-                                            let bundleId = rows[0].id;
-                                            let add_company_list = connection.query('insert into avail_bundle(company_id, bundle_id) values(?,?)',
-                                                [req.body.company_id, bundleId],function (err, rows) {
-                                                    if (err) {
-                                                        console.log(err);
-                                                        connection.rollback(function () {
-                                                            console.error('rollback error');
-                                                            throw err;
-                                                        });
-                                                    }else{
-                                                        connection.commit(function (err) {
-                                                            if (err) {
-                                                                console.error(err);
-                                                                connection.rollback(function () {
-                                                                    console.error('rollback error');
-                                                                    throw err;
-                                                                });
-                                                            }// if err
-                                                            let finalpath = diskpath + save_path;
-                                                            mkdir(diskpath + save_path, function (err) {
-                                                                if (err) throw(err);
-                                                                req.body.filename = hash;
-                                                                cb(null, diskpath + save_path);
-                                                            });
-
-                                                        });
-                                                    }
+                                            connection.commit(function (err) {
+                                                if (err) {
+                                                    console.error(err);
+                                                    connection.rollback(function () {
+                                                        console.error('rollback error');
+                                                        throw err;
+                                                    });
+                                                }// if err
+                                                let finalpath = diskpath + save_path;
+                                                mkdir(diskpath + save_path, function (err) {
+                                                    if (err) throw(err);
+                                                    req.body.filename = hash;
+                                                    cb(null, diskpath + save_path);
                                                 });
+
+                                            });
                                         }
                                         else{
                                             connection.rollback(function () {

@@ -84,6 +84,9 @@ function getToken(app) {
 
     }
 }
+function getCompanyList(){
+
+}
 function getFile(app) {
     return function f(e) {
         app.file_input.click();
