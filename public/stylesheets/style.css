@@ -28,6 +28,9 @@ input[type='text'], input[type='password']{
   margin-right : 15px;
   cursor: pointer;
 }
+.btn:disabled{
+    background-color: #e2e2e2;
+}
 .message{
   padding: 30px 10px;
   background-color: #b7ff9f;
@@ -41,6 +44,13 @@ input[type='text'], input[type='password']{
 }
 .hidden{
   visibility: hidden;
+}
+.list ul{
+    display: block;
+    list-style: none;
+}
+.list ul li{
+    cursor: pointer;
 }
 #hide{
   display: none;

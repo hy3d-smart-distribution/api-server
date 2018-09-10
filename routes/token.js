@@ -61,8 +61,7 @@ router.post('/login', function (req, res, next) {
                 name: user.name,
                 company: user.company
             };
-            let policy = {expiresIn: "1h"};
-            jwt.sign(info, req.app.get('jwt-secret'),policy, (err, token) => {
+            jwt.sign(info, req.app.get('jwt-secret'), (err, token) => {
                 if (err) console.log(err);
                 return res.json({result: "success",description: "success" ,token,user: user_info});
             });
@@ -112,7 +111,6 @@ router.get('/refresh', function (req, res,next) {
             if (err) {
                 res.status(500).json(err);
             }
-            let policy = {expiresIn: "1h"};
             let info = {
                 user_id: token.id,
                 company_id : token.company_id,
@@ -120,7 +118,7 @@ router.get('/refresh', function (req, res,next) {
                 name : token.name,
                 company : token.company
             };
-            jwt.sign(info, req.app.get('jwt-secret'),policy, (err, newtoken) => {
+            jwt.sign(info, req.app.get('jwt-secret'), (err, newtoken) => {
                 if (err) console.log(err);
                 return res.status(200).json({result: "success", token: newtoken});
             });

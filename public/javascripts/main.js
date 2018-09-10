@@ -57,6 +57,8 @@ function doLogin(app) {
 function uploadNotify(app){
     return function f(e) {
         var json  =  JSON.parse(this.responseText);
+        app.btn_uploadFile.disabled = false;
+        app.btn_uploadFile.innerHTML = "업로드";
         app.message_upload.innerHTML = "업로드가 완료되었습니다.";
     }
 }
@@ -102,9 +104,10 @@ function setFileUpload(app) {
 }
 function uploadFile(app) {
     return function f(e) {
-        console.log('upload');
+        app.btn_uploadFile.disabled = true;
+        app.btn_uploadFile.innerHTML = "업로드중..";
         var data = new FormData();
-        data.append('company_id', "1");
+        //data.append('company_id', "1");
         data.append('bundle', app.file_data);
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'bundle/upload');
