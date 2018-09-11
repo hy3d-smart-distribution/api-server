@@ -20,7 +20,7 @@ let connection = mysql.createConnection({
     database: config.database.dbname
 });
 
-router.get('',function (req, res, next) {
+router.get('list',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result:"token_not_valid"});
@@ -29,8 +29,14 @@ router.get('',function (req, res, next) {
                 res.status(500).json(err);
                 return;
             }else{
-                let show_company = connection.query('',function (err, rows) {
-                    
+                let show_company = connection.query('select id, name from company',function (err, rows) {
+                    if (err) {
+                        res.status(500).json(err);
+                    }else if(rows.length===0){
+                        res.status(500).json({result: "error", description: "empty_list"});
+                    }else{
+                        res.status(200).json({result: "success", description: "success", companies: rows});
+                    }
                 });
             }
 

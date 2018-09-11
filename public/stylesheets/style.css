@@ -45,12 +45,23 @@ input[type='text'], input[type='password']{
 .hidden{
   visibility: hidden;
 }
+.list{
+  display: inline-block;
+  border-style: solid;
+  width: 200px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 200px;
+
+}
 .list ul{
     display: block;
     list-style: none;
+    padding-left: 10px;
 }
 .list ul li{
     cursor: pointer;
+
 }
 #hide{
   display: none;

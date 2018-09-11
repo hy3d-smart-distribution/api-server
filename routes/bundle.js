@@ -129,8 +129,8 @@ router.get('/list', function(req, res, next) {
             if (err) {
                 res.status(500).json(err);
             }
-            let show_model = connection.query("select hash, file_name from file_info " +
-                "join avail_model on file_info.id = model.file_id where member_id = ?",[token.id],function (err,rows) {
+            let show_bundle = connection.query("select hash, file_name from file_info " +
+                "join bundle on file_info.id = bundle.file_id",[token.id],function (err,rows) {
                 if (err) {
                     res.status(500).json(err);
                 }else if(rows.length===0){
