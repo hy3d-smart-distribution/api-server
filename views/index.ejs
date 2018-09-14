@@ -38,7 +38,7 @@
   </div>
   <div id="bundle_list" style="display: block">
       <div class="center">
-          <div class="list">
+          <div id="company_list" class="list">
               <div>회사 목록</div>
               <ul>
                   <li>a</li>
@@ -71,6 +71,10 @@
       </div>
   </div>
   <div class="g-signin2" data-onsuccess="onSignIn"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
   <script type="text/javascript" src="/javascripts/main.js"></script>
+    <script id="companyList" type="rv/template">
+        <li>{{name}}</li>
+    </script>
   </body>
 </html>

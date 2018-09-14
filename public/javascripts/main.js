@@ -1,5 +1,5 @@
 window.addEventListener('load', function () {
-    var companyList = document.querySelector('#companyList');
+    var elem_companyList = document.querySelector('#company_list ul');
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
     var message_login = document.querySelector('#login .message');
@@ -9,6 +9,7 @@ window.addEventListener('load', function () {
     var file_input = document.querySelector("#upload input[type='file']");
     var page_login = document.querySelector('#login');
     var page_upload = document.querySelector('#upload');
+    var template_companyList = document.querySelector('#companyList');
 
 
     var token = "";
@@ -23,10 +24,10 @@ window.addEventListener('load', function () {
         file_data: null,
         message_login: message_login,
         message_upload: message_upload,
+        elem_companyList: elem_companyList,
         page_login: page_login,
         page_upload: page_upload,
-
-
+        template_companyList: template_companyList
     };
 
     input_password.addEventListener('keypress',catchEnter(app));
@@ -78,17 +79,40 @@ function getToken(app) {
             if(json.token!==undefined){
                 var token = json.token;
                 app.token = token;
+                app.page_login.style.display = 'none';
+                app.page_upload.style.display = 'block';
+
+                getCompanyList(app);
+
             }
-            app.page_login.style.display = 'none';
-            app.page_upload.style.display = 'block';
+
         }
 
 
     }
 }
-function getCompanyList(){
-
+function getCompanyList(app){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'company/list');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+    xhr.addEventListener('load', renderCompanylist(app));
+    xhr.send();
 }
+function renderCompanylist(app){
+    return function f(e) {
+        var json  =  JSON.parse(this.responseText);
+        var company = json.company;
+        var result = json.result;
+        var html = app.template_companyList.innerText;
+        var bindTemplate = Handlebars.compile(html);
+        var resultHTML = company.reduce(function(prev, next){
+            return prev + bindTemplate(next);
+        },"");
+        app.elem_companyList.innerHTML = resultHTML;
+    }
+}
+
+
 function getFile(app) {
     return function f(e) {
         app.file_input.click();

@@ -20,7 +20,7 @@ let connection = mysql.createConnection({
     database: config.database.dbname
 });
 
-router.get('list',function (req, res, next) {
+router.get('/list',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result:"token_not_valid"});
@@ -35,11 +35,58 @@ router.get('list',function (req, res, next) {
                     }else if(rows.length===0){
                         res.status(500).json({result: "error", description: "empty_list"});
                     }else{
-                        res.status(200).json({result: "success", description: "success", companies: rows});
+                        res.status(200).json({result: "success", description: "success", company: rows});
                     }
                 });
             }
 
+        });
+    })(req, res, next);
+});
+router.post('add',function () {
+    if(req.body.company===undefined){
+        return res.status(404).json({result: 'no_companyname'});
+    }
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json({result:"token_not_valid"});
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+                return;
+            }else{
+                let new_company = connection.query('insert into company(name) values(?)',[req.body.company],function (err, rows) {
+                    if (err) {
+                        res.status(500).json(err);
+                    }else{
+                        res.status(200).json({result: "success"});
+                    }
+                });
+            }
+
+        });
+    })(req, res, next);
+});
+router.delete('remove',function () {
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json({result:"token_not_valid"});
+        req.login(token, {session: false}, (err) => {
+            if(req.body.companyid===undefined) {
+                res.status(400).json({result: "no_companyid_found"});
+            }
+            else if (err) {
+                res.status(500).json(err);
+                return;
+            }else{
+                let delete_company = connection.query('delete from company where id = ?',[req.body.companyid],function (err, rows) {
+                    if (err) {
+                        res.status(500).json(err);
+                    }else{
+                        res.status(200).json({result: "success"});
+                    }
+                });
+            }
         });
     })(req, res, next);
 });
