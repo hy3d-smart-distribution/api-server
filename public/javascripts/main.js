@@ -11,7 +11,6 @@ window.addEventListener('load', function () {
     var page_upload = document.querySelector('#upload');
     var template_companyList = document.querySelector('#companyList');
 
-
     var token = "";
     var app = {
         token: token,
@@ -35,6 +34,7 @@ window.addEventListener('load', function () {
     btn_getFile.addEventListener('click',getFile(app));
     btn_uploadFile.addEventListener('click',uploadFile(app));
     file_input.addEventListener('change',setFileUpload(app));
+    elem_companyList.addEventListener('click',getCompanyInfo(app));
 });
 function catchEnter(app) {
     return function f(e) {
@@ -166,4 +166,9 @@ function validate() {
         console.log('Signed in as: ' + xhr.responseText);
     };
     xhr.send('idtoken=' + id_token);
+}
+function getCompanyInfo(app) {
+    return function f(e) {
+
+    }
 }
