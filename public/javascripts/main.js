@@ -2,10 +2,13 @@ window.addEventListener('load', function () {
     var elem_companyList = document.querySelector('#company_list ul');
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
+    var input_companyName = document.querySelector("[name='new_company']").value;
     var message_login = document.querySelector('#login .message');
     var message_upload = document.querySelector('#upload .message');
+    var message_addCompany = document.querySelector('#comapny_add .message');
     var btn_getFile = document.querySelector('#get_file');
     var btn_uploadFile = document.querySelector('#upload_file');
+    var btn_addCompany = document.querySelector('#comapny_add button');
     var file_input = document.querySelector("#upload input[type='file']");
     var page_login = document.querySelector('#login');
     var page_upload = document.querySelector('#upload');
@@ -16,30 +19,42 @@ window.addEventListener('load', function () {
         token: token,
         companyList: companyList,
         input_password: input_password,
+        input_companyName: input_companyName,
         btn_login: btn_login,
         btn_getFile: btn_getFile,
         btn_uploadFile: btn_uploadFile,
+        btn_addCompany: btn_addCompany,
         file_input: file_input,
         file_data: null,
         message_login: message_login,
         message_upload: message_upload,
+        message_addCompany: message_addCompany,
         elem_companyList: elem_companyList,
         page_login: page_login,
         page_upload: page_upload,
         template_companyList: template_companyList
     };
-
     input_password.addEventListener('keypress',catchEnter(app));
+    input_companyName.addEventListener('keypress',catchEnterAddCompany(app));
+
     btn_login.addEventListener('click', doLogin(app));
     btn_getFile.addEventListener('click',getFile(app));
     btn_uploadFile.addEventListener('click',uploadFile(app));
+    btn_addCompany.addEventListener('click',addCompany(app));
     file_input.addEventListener('change',setFileUpload(app));
     elem_companyList.addEventListener('click',getCompanyInfo(app));
 });
 function catchEnter(app) {
     return function f(e) {
         if(e.which===13){
-            app.btn_login.click();
+            doLogin(app);
+        }
+    }
+}
+function catchEnterAddCompany(app) {
+    return function f(e) {
+        if(e.which===13){
+            addCompany(app);
         }
     }
 }
@@ -86,6 +101,30 @@ function getToken(app) {
 
             }
 
+        }
+
+
+    }
+}
+function addCompany(app) {
+    return function f(e) {
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'company/add');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+        xhr.addEventListener('load', addCompanyNotice(app));
+        xhr.send(JSON.stringify({companyName: companyName}));
+    }
+
+}
+function addCompanyNotice(app) {
+    return function f(e) {
+        var json  =  JSON.parse(this.responseText);
+        result = json.result;
+        if(result=="success"){
+            app.message_addCompany.innerText = "추가되었습니다.";
+        }else if(result=="token_not_vaild"){
+            app.message_addCompany.innerText = "인증정보가 유효하지 않습니다. 다시 로그인해 주십시오.";
         }
 
 

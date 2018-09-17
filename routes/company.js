@@ -43,9 +43,9 @@ router.get('/list',function (req, res, next) {
         });
     })(req, res, next);
 });
-router.post('add',function () {
+router.post('/add',function (req, res, next) {
     if(req.body.company===undefined){
-        return res.status(404).json({result: 'no_companyname'});
+        return res.status(404).json({result: 'no_companyName'});
     }
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
@@ -67,7 +67,7 @@ router.post('add',function () {
         });
     })(req, res, next);
 });
-router.delete('remove',function () {
+router.delete('remove',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result:"token_not_valid"});
