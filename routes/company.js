@@ -44,17 +44,25 @@ router.get('/list',function (req, res, next) {
     })(req, res, next);
 });
 router.post('/add',function (req, res, next) {
-    if(req.body.company===undefined){
-        return res.status(404).json({result: 'no_companyName'});
-    }
+
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result:"token_not_valid"});
         req.login(token, {session: false}, (err) => {
+            if(req.body.company===undefined){
+                return res.status(403).json({result: 'no_companyName'});
+            }
             if (err) {
                 res.status(500).json(err);
                 return;
             }else{
+                let get_privilege = connection.query('select privilege from member where email = ?',[token.email],
+                    function (err, rows) {
+                        if(rows[0].privilege === 0){
+                            res.status(403).json({result: "no_privilege"});
+                        }
+                });
+
                 let new_company = connection.query('insert into company(name) values(?)',[req.body.company],function (err, rows) {
                     if (err) {
                         res.status(500).json(err);

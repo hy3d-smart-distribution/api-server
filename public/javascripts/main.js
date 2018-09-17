@@ -2,13 +2,13 @@ window.addEventListener('load', function () {
     var elem_companyList = document.querySelector('#company_list ul');
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
-    var input_companyName = document.querySelector("[name='new_company']").value;
+    var input_companyName = document.querySelector("[name='new_company']");
     var message_login = document.querySelector('#login .message');
     var message_upload = document.querySelector('#upload .message');
-    var message_addCompany = document.querySelector('#comapny_add .message');
+    var message_addCompany = document.querySelector('#company_add .message');
     var btn_getFile = document.querySelector('#get_file');
     var btn_uploadFile = document.querySelector('#upload_file');
-    var btn_addCompany = document.querySelector('#comapny_add button');
+    var btn_addCompany = document.querySelector('#company_add button');
     var file_input = document.querySelector("#upload input[type='file']");
     var page_login = document.querySelector('#login');
     var page_upload = document.querySelector('#upload');
@@ -47,14 +47,15 @@ window.addEventListener('load', function () {
 function catchEnter(app) {
     return function f(e) {
         if(e.which===13){
-            doLogin(app);
+            app.btn_login.click();
+
         }
     }
 }
 function catchEnterAddCompany(app) {
     return function f(e) {
         if(e.which===13){
-            addCompany(app);
+            app.btn_addCompany.click();
         }
     }
 }
@@ -108,12 +109,13 @@ function getToken(app) {
 }
 function addCompany(app) {
     return function f(e) {
-
+        var companyName = app.input_companyName.value;
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'company/add');
+        xhr.open('POST', 'company/add');
         xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.addEventListener('load', addCompanyNotice(app));
-        xhr.send(JSON.stringify({companyName: companyName}));
+        xhr.send(JSON.stringify({company: companyName}));
     }
 
 }
@@ -121,9 +123,9 @@ function addCompanyNotice(app) {
     return function f(e) {
         var json  =  JSON.parse(this.responseText);
         result = json.result;
-        if(result=="success"){
+        if(result==="success"){
             app.message_addCompany.innerText = "추가되었습니다.";
-        }else if(result=="token_not_vaild"){
+        }else if(result==="token_not_valid"){
             app.message_addCompany.innerText = "인증정보가 유효하지 않습니다. 다시 로그인해 주십시오.";
         }
 
@@ -208,6 +210,10 @@ function validate() {
 }
 function getCompanyInfo(app) {
     return function f(e) {
-
+        if(e.target.tagName==="LI"){
+            var target = e.target;
+            var companyId = target.getAttribute("data-companyId");
+            console.log(companyId);
+        }
     }
 }

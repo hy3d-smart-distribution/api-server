@@ -41,7 +41,9 @@
           <div id="company_add">
               <input name="new_company" type="text" placeholder="회사명">
               <button class="btn">+ 추가</button>
-              <div class="message"></div>
+              <div class="message">
+                  추가할 회사명를 입력하세요.
+              </div>
           </div>
           <div id="company_list" class="list">
               <div>회사 목록</div>
@@ -86,7 +88,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
   <script type="text/javascript" src="/javascripts/main.js"></script>
     <script id="companyList" type="rv/template">
-        <li data-companyid="{{id}}">{{name}}</li>
+        <li data-companyId="{{id}}">{{name}}</li>
     </script>
   </body>
 </html>
