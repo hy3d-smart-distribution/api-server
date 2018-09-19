@@ -60,16 +60,19 @@ router.post('/add',function (req, res, next) {
                     function (err, rows) {
                         if(rows[0].privilege === 0){
                             res.status(403).json({result: "no_privilege"});
+                        }else{
+                            let new_company = connection.query('insert into company(name) values(?)',
+                                [req.body.company],function (err, rows) {
+                                if (err) {
+                                    res.status(500).json(err);
+                                }else{
+                                    res.status(200).json({result: "success"});
+                                }
+                            });
                         }
                 });
 
-                let new_company = connection.query('insert into company(name) values(?)',[req.body.company],function (err, rows) {
-                    if (err) {
-                        res.status(500).json(err);
-                    }else{
-                        res.status(200).json({result: "success"});
-                    }
-                });
+
             }
 
         });

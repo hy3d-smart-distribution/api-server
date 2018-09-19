@@ -10,9 +10,6 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const {OAuth2Client} = require('google-auth-library');
 
-
-
-
 let connection = mysql.createConnection({
     host: config.database.host,
     port: config.database.port,

@@ -17,19 +17,26 @@ window.addEventListener('load', function () {
     var token = "";
     var app = {
         token: token,
+        currentCompany: null,
+
         companyList: companyList,
         input_password: input_password,
         input_companyName: input_companyName,
+
         btn_login: btn_login,
         btn_getFile: btn_getFile,
         btn_uploadFile: btn_uploadFile,
         btn_addCompany: btn_addCompany,
+
         file_input: file_input,
         file_data: null,
+
         message_login: message_login,
         message_upload: message_upload,
         message_addCompany: message_addCompany,
+
         elem_companyList: elem_companyList,
+
         page_login: page_login,
         page_upload: page_upload,
         template_companyList: template_companyList
@@ -44,6 +51,7 @@ window.addEventListener('load', function () {
     file_input.addEventListener('change',setFileUpload(app));
     elem_companyList.addEventListener('click',getCompanyInfo(app));
 });
+
 function catchEnter(app) {
     return function f(e) {
         if(e.which===13){
@@ -59,6 +67,7 @@ function catchEnterAddCompany(app) {
         }
     }
 }
+
 function doLogin(app) {
     return function f(e) {
         var id = document.querySelector('#input_id').value;
@@ -152,7 +161,18 @@ function renderCompanylist(app){
         app.elem_companyList.innerHTML = resultHTML;
     }
 }
+function getBundleList(app) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'company/list');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+    xhr.addEventListener('load', renderBundlelist(app));
+    xhr.send();
+}
+function renderBundleList() {
+    return function f(e) {
 
+    }
+}
 
 function getFile(app) {
     return function f(e) {
@@ -213,7 +233,8 @@ function getCompanyInfo(app) {
         if(e.target.tagName==="LI"){
             var target = e.target;
             var companyId = target.getAttribute("data-companyId");
-            console.log(companyId);
+            app.currentCompany = companyId;
+            renderCompanylist();
         }
     }
 }
