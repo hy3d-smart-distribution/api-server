@@ -78,22 +78,24 @@ router.post('/add',function (req, res, next) {
         });
     })(req, res, next);
 });
-router.delete('remove',function (req, res, next) {
+router.delete('/remove',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result:"token_not_valid"});
         req.login(token, {session: false}, (err) => {
-            if(req.body.companyid===undefined) {
-                res.status(400).json({result: "no_companyid_found"});
-            }
-            else if (err) {
+
+            if (err) {
                 res.status(500).json(err);
                 return;
             }else{
-                let delete_company = connection.query('delete from company where id = ?',[req.body.companyid],function (err, rows) {
+                if(req.query.id===undefined) {
+                    res.status(400).json({result: "no_companyid_found"});
+                }
+                let delete_company = connection.query('delete from company where id = ?',[req.query.id],function (err, rows) {
                     if (err) {
                         res.status(500).json(err);
                     }else{
+
                         res.status(200).json({result: "success"});
                     }
                 });

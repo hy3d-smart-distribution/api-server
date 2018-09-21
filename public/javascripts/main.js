@@ -1,5 +1,6 @@
 window.addEventListener('load', function () {
     var elem_companyList = document.querySelector('#company_list ul');
+    var elem_bundleList = document.querySelector('#bundle_list .list ul');
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
     var input_companyName = document.querySelector("[name='new_company']");
@@ -13,6 +14,7 @@ window.addEventListener('load', function () {
     var page_login = document.querySelector('#login');
     var page_upload = document.querySelector('#upload');
     var template_companyList = document.querySelector('#companyList');
+    var template_bundleList = document.querySelector('#bundleList');
 
     var token = "";
     var app = {
@@ -36,10 +38,13 @@ window.addEventListener('load', function () {
         message_addCompany: message_addCompany,
 
         elem_companyList: elem_companyList,
+        elem_bundleList, elem_bundleList,
 
         page_login: page_login,
         page_upload: page_upload,
-        template_companyList: template_companyList
+
+        template_companyList: template_companyList,
+        template_bundleList: template_bundleList
     };
     input_password.addEventListener('keypress',catchEnter(app));
     input_companyName.addEventListener('keypress',catchEnterAddCompany(app));
@@ -107,6 +112,7 @@ function getToken(app) {
                 app.page_login.style.display = 'none';
                 app.page_upload.style.display = 'block';
 
+                getBundleList(app);
                 getCompanyList(app);
 
             }
@@ -163,14 +169,22 @@ function renderCompanylist(app){
 }
 function getBundleList(app) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'company/list');
+    xhr.open('GET', 'bundle/list');
     xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
-    xhr.addEventListener('load', renderBundlelist(app));
+    xhr.addEventListener('load', renderBundleList(app));
     xhr.send();
 }
-function renderBundleList() {
+function renderBundleList(app) {
     return function f(e) {
-
+        var json  =  JSON.parse(this.responseText);
+        var bundle = json.bundle;
+        var result = json.result;
+        var html = app.template_bundleList.innerText;
+        var bindTemplate = Handlebars.compile(html);
+        var resultHTML = bundle.reduce(function(prev, next){
+            return prev + bindTemplate(next);
+        },"");
+        app.elem.innerHTML = resultHTML;
     }
 }
 
