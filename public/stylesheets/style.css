@@ -60,7 +60,11 @@ input[type='text'], input[type='password']{
     padding-left: 10px;
 }
 .list ul li{
-    cursor: pointer;
+
+
+}
+.list ul span{
+  float: right;
 
 }
 #hide{

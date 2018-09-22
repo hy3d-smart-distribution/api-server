@@ -55,40 +55,42 @@
       </div>
 
   </div>
+  <div id="company_info" style="display: block">
+      <div class="center">
+          <div class="list">
+              <div>추가할 수 있는 번들 리스트</div>
+              <ul>
+
+              </ul>
+          </div>
+          <div class="list">
+              <div>사용중인 번들 리스트</div>
+              <ul>
+
+              </ul>
+          </div>
+      </div>
+  </div>
   <div id="bundle_list" style="display: block">
       <div class="center">
-
-
           <div class="list">
-              <div>기존에 등록된 번들 목록</div>
+              <div>번들 목록</div>
               <ul>
-                  <li>a<button>토글</button><button>삭제</button></li>
-                  <li>b</li>
+
               </ul>
           </div>
 
       </div>
-      <div class="center">
-          <div>번들 리스트</div>
-
-          <div class="list">
-              <ul>
-                  <li>a</li>
-                  <li>b</li>
-              </ul>
-          </div>
-      </div>
   </div>
-  <div id="bundle_info" style="display: block">
-      <div class="center">
 
-      </div>
-  </div>
   <div class="g-signin2" data-onsuccess="onSignIn"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
   <script type="text/javascript" src="/javascripts/main.js"></script>
   <script id="bundleList" type="rv/template">
-      <li data-bundleId="{{id}}">{{file_name}}</li>
+      <li data-bundleId="{{id}}">
+          {{file_name}}
+          <span>X</span>
+      </li>
   </script>
   </body>
   <script type="text/javascript" src="/javascripts/main.js"></script>

@@ -16,7 +16,7 @@ let connection = mysql.createConnection({
     password: config.database.password,
     database: config.database.dbname
 });
-let saveStorage  = multer.diskStorage({
+let saveStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         let hash = sha256(file.originalname + new Date().valueOf());
         let fir = hash.substring(0, 2);
@@ -58,15 +58,15 @@ let saveStorage  = multer.diskStorage({
                                         console.error('rollback error');
                                         throw err;
                                     });
-                                }else if(rows){
-                                    let get_bundle_id = connection.query('select id from bundle where file_id = ?',[fileId],function (err, rows) {
+                                } else if (rows) {
+                                    let get_bundle_id = connection.query('select id from bundle where file_id = ?', [fileId], function (err, rows) {
                                         if (err) {
                                             console.log(err);
                                             connection.rollback(function () {
                                                 console.error('rollback error');
                                                 throw err;
                                             });
-                                        }else if(rows){
+                                        } else if (rows) {
                                             connection.commit(function (err) {
                                                 if (err) {
                                                     console.error(err);
@@ -84,7 +84,7 @@ let saveStorage  = multer.diskStorage({
 
                                             });
                                         }
-                                        else{
+                                        else {
                                             connection.rollback(function () {
                                                 console.error('rollback error');
                                                 throw err;
@@ -92,8 +92,6 @@ let saveStorage  = multer.diskStorage({
                                         }
                                     });
                                 }
-
-
 
 
                             });
@@ -109,19 +107,19 @@ let saveStorage  = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         let fileExtension = file.originalname.split('.')[1];
-        if(fileExtension === undefined){
+        if (fileExtension === undefined) {
             cb(null, req.body.filename);
-        }else{
+        } else {
             cb(null, req.body.filename + '.' + fileExtension);
         }
 
     }
 });
-let upload = multer ({
+let upload = multer({
     storage: saveStorage,
 });
 
-router.get('/list', function(req, res, next) {
+router.get('/list', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result: "error", description: "invlid_token"});
@@ -129,13 +127,13 @@ router.get('/list', function(req, res, next) {
             if (err) {
                 res.status(500).json(err);
             }
-            let show_bundle = connection.query("select hash, file_name from file_info " +
-                "join bundle on file_info.id = bundle.file_id",function (err,rows) {
+            let show_bundle = connection.query("select bundle.id as id, hash, file_name from file_info " +
+                "join bundle on file_info.id = bundle.file_id", function (err, rows) {
                 if (err) {
                     res.status(500).json(err);
-                }else if(rows.length===0){
+                } else if (rows.length === 0) {
                     res.status(500).json({result: "error", description: "empty_list"});
-                }else{
+                } else {
                     res.status(200).json({result: "success", description: "success", bundles: rows});
                 }
             });
@@ -145,7 +143,7 @@ router.get('/list', function(req, res, next) {
     })(req, res, next);
 
 });
-router.get('/list/:companyId', function(req, res, next) {
+router.get('/use_list/:companyId', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result: "error", description: "invlid_token"});
@@ -155,12 +153,12 @@ router.get('/list/:companyId', function(req, res, next) {
             }
             let show_bundle = connection.query("select purchase, hash, file_name from file_info " +
                 "join bundle on file_info.id = bundle.file_id " +
-                "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?",[req.params.companyId],function (err,rows) {
+                "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?", [req.params.companyId], function (err, rows) {
                 if (err) {
                     res.status(500).json(err);
-                }else if(rows.length===0){
+                } else if (rows.length === 0) {
                     res.status(404).json({result: "error", description: "empty_list"});
-                }else{
+                } else {
                     res.status(200).json({result: "success", description: "success", bundles: rows});
                 }
             });
@@ -170,25 +168,99 @@ router.get('/list/:companyId', function(req, res, next) {
     })(req, res, next);
 
 });
-router.get('/available/:companyId',function (req,res,next) {
+router.get('/available_list/:companyId', function (req, res, next) {
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json({result: "error", description: "invlid_token"});
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+            }
+            let find_avail_bundle
+                = connection.query("select bundle_id from avail_bundle where company_id = ?", [req.params.companyId], function (err, rows) {
+                if (err) {
+                    res.status(500).json(err);
+                } else if (rows.length === 0) {
+
+                    let show_bundle = connection.query("select bundle.id, purchase, hash, file_name from file_info " +
+                        "join bundle on file_info.id = bundle.file_id " +
+                        "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?"
+                        , [req.params.companyId], function (err, rows) {
+                            if (err) {
+                                res.status(500).json(err);
+                            } else if (rows.length === 0) {
+                                res.status(404).json({result: "error", description: "empty_list"});
+                            } else {
+                                res.status(200).json({result: "success", description: "success", bundles: rows});
+                            }
+                        });
+
+                } else {
+
+                    let not_in_avail_bundle = connection.query("select purchase, hash,file_name from file_info " +
+                        "join bundle on file_info.id = bundle.file_id " +
+                        "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id not in (?)"
+                        , [rows], function (err, rows) {
+                            res.status(200).json({result: "success", description: "success", bundles: rows});
+                        });
+
+                }
+            });
+
+        });
+
+    })(req, res, next);
+});
+router.post('/available_list/add', function (req, res, next) {
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json({result: "error", description: "invalid_token"});
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+            }
+            let find_avail_bundle = connection.query('select bundle_id from avail_bundle ' +
+                'where company_id = ? and bundle_id = ?',[req.body.companyId,req.body.bundleId],function (err,rows) {
+                if(err){
+                    res.status(500).json(err);
+                }else if(rows.length===0){
+                    let insert_bundle_to_company = connection.query('insert into avail_bundle(company_id,bundle_id) values(?,?)', [req.body.companyId, req.body.bundleId], function (err, rows) {
+                        if (err) {
+                            res.status(500).json(err);
+                        } else {
+                            res.status(200).json({result: "success"});
+                        }
+
+                    });
+
+                }else{
+                    res.status(404).json({result: "error", description: "already_exists"});
+                }
+            });
+
+
+        });
+
+    })(req, res, next);
 
 });
 
-router.post('/upload', function(req, res, next) {
+
+router.post('/upload', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
-        if (!token) return res.status(403).json({result:"token_not_valid"});
+        if (!token) return res.status(403).json({result: "token_not_valid"});
         req.login(token, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
                 return;
-            }else{
+            } else {
                 var store = upload.single('bundle');
                 store(req, res, function (err) {
 
                     if (err) {
                         console.log(err);
-                        return  res.status(500).json({result: "error"});
+                        return res.status(500).json({result: "error"});
                     }
                     return res.status(200).json({result: "success"});
                 });
@@ -199,22 +271,22 @@ router.post('/upload', function(req, res, next) {
 
 });
 
-router.get('/get/:hash',function (req, res, next) {
+router.get('/get/:hash', function (req, res, next) {
 
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
-        if (!token) return res.status(403).json({result:"token_not_vaild"});
+        if (!token) return res.status(403).json({result: "token_not_vaild"});
         req.login(token, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
             }
             var hash = req.params.hash;
-            var find_file_hash = connection.query('select path, file_name from file_info join disk on file_info.id = disk.id',function (err, rows) {
-                if(err){
+            var find_file_hash = connection.query('select path, file_name from file_info join disk on file_info.id = disk.id', function (err, rows) {
+                if (err) {
                     throw err;
-                }else if(rows.length===0){
-                    res.status(400).json({result : "no_file_exists"});
-                }else{
+                } else if (rows.length === 0) {
+                    res.status(400).json({result: "no_file_exists"});
+                } else {
                     var diskpath = rows[0].path;
                     var file_name = rows[0].name;
                     let fir = hash.substring(0, 2);
@@ -225,7 +297,6 @@ router.get('/get/:hash',function (req, res, next) {
                     res.download(finalpath, file_name);
                 }
             });
-
 
 
         });

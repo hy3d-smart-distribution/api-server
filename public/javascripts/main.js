@@ -55,6 +55,7 @@ window.addEventListener('load', function () {
     btn_addCompany.addEventListener('click',addCompany(app));
     file_input.addEventListener('change',setFileUpload(app));
     elem_companyList.addEventListener('click',getCompanyInfo(app));
+    elem_bundleList.addEventListener('click',getBundleList(app));
 });
 
 function catchEnter(app) {
@@ -85,6 +86,7 @@ function doLogin(app) {
     };
 
 }
+
 function uploadNotify(app){
     return function f(e) {
         var json  =  JSON.parse(this.responseText);
@@ -159,12 +161,15 @@ function renderCompanylist(app){
         var json  =  JSON.parse(this.responseText);
         var company = json.company;
         var result = json.result;
-        var html = app.template_companyList.innerText;
-        var bindTemplate = Handlebars.compile(html);
-        var resultHTML = company.reduce(function(prev, next){
-            return prev + bindTemplate(next);
-        },"");
-        app.elem_companyList.innerHTML = resultHTML;
+        if(result==="success"){
+            var html = app.template_companyList.innerText;
+            var bindTemplate = Handlebars.compile(html);
+            var resultHTML = company.reduce(function(prev, next){
+                return prev + bindTemplate(next);
+            },"");
+            app.elem_companyList.innerHTML = resultHTML;
+        }
+
     }
 }
 function getBundleList(app) {
@@ -177,17 +182,33 @@ function getBundleList(app) {
 function renderBundleList(app) {
     return function f(e) {
         var json  =  JSON.parse(this.responseText);
-        var bundle = json.bundle;
+        var bundles = json.bundles;
         var result = json.result;
-        var html = app.template_bundleList.innerText;
-        var bindTemplate = Handlebars.compile(html);
-        var resultHTML = bundle.reduce(function(prev, next){
-            return prev + bindTemplate(next);
-        },"");
-        app.elem.innerHTML = resultHTML;
+
+        if(result==="success"){
+            var html = app.template_bundleList.innerText;
+            var bindTemplate = Handlebars.compile(html);
+            var resultHTML = bundles.reduce(function(prev, next){
+                return prev + bindTemplate(next);
+            },"");
+            app.elem_bundleList.innerHTML = resultHTML;
+        }
+
     }
 }
 
+function deleteBundle(app) {
+    return function f(e) {
+        if(e.target.tagName==="SPAN"){
+            var target = e.target.closest('li');
+            var bundleId = target.getAttribute("data-bundleId");
+            
+        }
+    }
+}
+function notifyDelete() {
+    
+}
 function getFile(app) {
     return function f(e) {
         app.file_input.click();
