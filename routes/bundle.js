@@ -5,9 +5,13 @@ let path = require('path');
 let mkdir = require('mkdirp');
 let mysql = require('mysql');
 let env = 'development';
+let fs = require('fs');
+
 let config = require('../config')[env];
+
 const crypto = require('crypto');
 let passport = require('passport');
+
 const sha256 = x => crypto.createHash('sha256').update(x, 'utf8').digest('hex');
 let connection = mysql.createConnection({
     host: config.database.host,
@@ -151,7 +155,7 @@ router.get('/use_list/:companyId', function (req, res, next) {
             if (err) {
                 res.status(500).json(err);
             }
-            let show_bundle = connection.query("select purchase, hash, file_name from file_info " +
+            let show_bundle = connection.query("select bundle.id purchase, hash, file_name from file_info " +
                 "join bundle on file_info.id = bundle.file_id " +
                 "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?", [req.params.companyId], function (err, rows) {
                 if (err) {
@@ -176,13 +180,14 @@ router.get('/available_list/:companyId', function (req, res, next) {
             if (err) {
                 res.status(500).json(err);
             }
+            console.log(req.params.companyId);
             let find_avail_bundle
                 = connection.query("select bundle_id from avail_bundle where company_id = ?", [req.params.companyId], function (err, rows) {
                 if (err) {
                     res.status(500).json(err);
                 } else if (rows.length === 0) {
 
-                    let show_bundle = connection.query("select bundle.id, purchase, hash, file_name from file_info " +
+                    let show_all_bundle = connection.query("select bundle.id, purchase, hash, file_name from file_info " +
                         "join bundle on file_info.id = bundle.file_id " +
                         "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?"
                         , [req.params.companyId], function (err, rows) {
@@ -197,10 +202,18 @@ router.get('/available_list/:companyId', function (req, res, next) {
 
                 } else {
 
-                    let not_in_avail_bundle = connection.query("select purchase, hash,file_name from file_info " +
+                    let bundle_list = [];
+
+                    for (let i = 0; i < rows.length; i++) {
+                        let bundle_id = rows[i].bundle_id;
+                        bundle_list.push(bundle_id);
+                    }
+                    console.log(bundle_list);
+
+                    let not_in_avail_bundle = connection.query("select bundle.id, hash,file_name from file_info " +
                         "join bundle on file_info.id = bundle.file_id " +
-                        "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id not in (?)"
-                        , [rows], function (err, rows) {
+                        "where bundle.id not in (?)"
+                        , [ bundle_list], function (err, rows) {
                             res.status(200).json({result: "success", description: "success", bundles: rows});
                         });
 
@@ -211,6 +224,7 @@ router.get('/available_list/:companyId', function (req, res, next) {
 
     })(req, res, next);
 });
+
 router.post('/available_list/add', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
@@ -270,6 +284,60 @@ router.post('/upload', function (req, res, next) {
     })(req, res, next);
 
 });
+router.post('/delete',function (req,res,next) {
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json({result: "token_not_valid"});
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+
+                return res.status(500).json(err);
+            } else {
+                let hash = req.body.hash;
+
+                let find_path = connection.query('select file_name, path from file_info join disk on disk_id = disk.id where hash = ?'
+                    ,[hash],function (err,rows) {
+                    if(rows.length===0){
+                        res.status(400).json({result: "error",description: "no_file_exists" });
+
+                    }else{
+                        let diskpath = rows[0].path;
+                        let ext = rows[0].file_name.split('.')[1];
+
+                        let fir = hash.substring(0, 2);
+                        let sec = hash.substring(2, 4);
+                        let trd = hash.substring(4, 6);
+                        let save_path = "/" + fir + "/" + sec + "/" + trd + "/";
+                        let target = "";
+                        if(ext===undefined){
+                            target = diskpath + save_path + hash;
+                        }else{
+                            target = diskpath + save_path + hash +'.'+ ext;
+                        }
+                        fs.unlink(target,function (err) {
+                            if(err) throw err;
+                            else{
+                                let delete_hash = connection.query('delete from file_info where hash = ?',[hash], function (err, rows) {
+                                    if(err){
+                                        throw err;
+                                    }else{
+                                        return res.status(200).json({result: "success"});
+                                    }
+                                });
+
+                            }
+                        });
+
+                    }
+                });
+
+
+            }
+
+        });
+    })(req, res, next);
+});
+
 
 router.get('/get/:hash', function (req, res, next) {
 
@@ -287,8 +355,8 @@ router.get('/get/:hash', function (req, res, next) {
                 } else if (rows.length === 0) {
                     res.status(400).json({result: "no_file_exists"});
                 } else {
-                    var diskpath = rows[0].path;
-                    var file_name = rows[0].name;
+                    let diskpath = rows[0].path;
+                    let file_name = rows[0].name;
                     let fir = hash.substring(0, 2);
                     let sec = hash.substring(2, 4);
                     let trd = hash.substring(4, 6);
