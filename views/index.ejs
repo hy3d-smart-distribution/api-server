@@ -57,13 +57,13 @@
   </div>
   <div id="company_info" style="display: block">
       <div class="center">
-          <div class="list">
+          <div class="avail_bundle list">
               <div>추가할 수 있는 번들 리스트</div>
               <ul>
 
               </ul>
           </div>
-          <div class="list">
+          <div class="used_bundle list">
               <div>사용중인 번들 리스트</div>
               <ul>
 
@@ -84,18 +84,21 @@
   </div>
 
   <div class="g-signin2" data-onsuccess="onSignIn"></div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
-  <script type="text/javascript" src="/javascripts/main.js"></script>
+
+  <script id="companyList" type="rv/template">
+      <li data-companyId="{{id}}">
+          {{name}}
+          <span>X</span>
+      </li>
+  </script>
   <script id="bundleList" type="rv/template">
       <li data-bundleId="{{id}}">
           {{file_name}}
           <span>X</span>
       </li>
   </script>
-  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
   <script type="text/javascript" src="/javascripts/main.js"></script>
-    <script id="companyList" type="rv/template">
-        <li data-companyId="{{id}}">{{name}}</li>
-    </script>
   </body>
+
 </html>

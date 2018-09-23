@@ -147,17 +147,17 @@ router.get('/list', function (req, res, next) {
     })(req, res, next);
 
 });
-router.get('/use_list/:companyId', function (req, res, next) {
+router.get('/used_list/:companyId', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result: "error", description: "invlid_token"});
         req.login(token, {session: false}, (err) => {
             if (err) {
-                res.status(500).json(err);
-            }
-            let show_bundle = connection.query("select bundle.id purchase, hash, file_name from file_info " +
-                "join bundle on file_info.id = bundle.file_id " +
-                "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?", [req.params.companyId], function (err, rows) {
+            res.status(500).json(err);
+        }
+        let show_bundle = connection.query("select bundle.id purchase, hash, file_name from file_info " +
+            "join bundle on file_info.id = bundle.file_id " +
+            "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?", [req.params.companyId], function (err, rows) {
                 if (err) {
                     res.status(500).json(err);
                 } else if (rows.length === 0) {

@@ -1,6 +1,9 @@
 window.addEventListener('load', function () {
     var elem_companyList = document.querySelector('#company_list ul');
     var elem_bundleList = document.querySelector('#bundle_list .list ul');
+    var elem_availBundleList = document.querySelector('#company_info .avail_bundle ul');
+    var elem_usedBundleList = document.querySelector('#company_info .used_bundle ul');
+
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
     var input_companyName = document.querySelector("[name='new_company']");
@@ -38,7 +41,9 @@ window.addEventListener('load', function () {
         message_addCompany: message_addCompany,
 
         elem_companyList: elem_companyList,
-        elem_bundleList, elem_bundleList,
+        elem_bundleList: elem_bundleList,
+        elem_availBundleList: elem_availBundleList,
+        elem_usedBundleList: elem_usedBundleList,
 
         page_login: page_login,
         page_upload: page_upload,
@@ -54,8 +59,12 @@ window.addEventListener('load', function () {
     btn_uploadFile.addEventListener('click',uploadFile(app));
     btn_addCompany.addEventListener('click',addCompany(app));
     file_input.addEventListener('change',setFileUpload(app));
-    elem_companyList.addEventListener('click',getCompanyInfo(app));
-    elem_bundleList.addEventListener('click',getBundleList(app));
+    elem_companyList.addEventListener('click',doCompanyAction(app));
+    elem_bundleList.addEventListener('click',doBundleAction(app));
+    elem_usedBundleList.addEventListener('click',doUsedBundleAction(app));
+    elem_availBundleList.addEventListener('click',doAvailBundleAction(app));
+    
+    
 });
 
 function catchEnter(app) {
@@ -114,7 +123,7 @@ function getToken(app) {
                 app.page_login.style.display = 'none';
                 app.page_upload.style.display = 'block';
 
-                getBundleList(app);
+                getBundleList(app)();
                 getCompanyList(app);
 
             }
@@ -172,12 +181,15 @@ function renderCompanylist(app){
 
     }
 }
-function getBundleList(app) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'bundle/list');
-    xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
-    xhr.addEventListener('load', renderBundleList(app));
-    xhr.send();
+function getBundleList(app){
+    return function f(e) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'bundle/list');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+        xhr.addEventListener('load', renderBundleList(app));
+        xhr.send();
+    }
+
 }
 function renderBundleList(app) {
     return function f(e) {
@@ -193,6 +205,21 @@ function renderBundleList(app) {
             },"");
             app.elem_bundleList.innerHTML = resultHTML;
         }
+
+    }
+}
+function doBundleAction(app) {
+    return function f(e) {
+
+    }
+}
+function doUsedBundleAction(app) {
+    return function f(e) {
+
+    }
+}
+function doAvailBundleAction(app) {
+    return function f(e) {
 
     }
 }
@@ -219,7 +246,7 @@ function setFileUpload(app) {
     return function f(e) {
         app.file_data = document.querySelector("#upload input[type='file']").files[0];
         app.message_upload.innerHTML='파일명 : ' + app.file_data.name;
-        console.log(app.file_data);
+
     };
 }
 function uploadFile(app) {
@@ -263,13 +290,70 @@ function validate() {
     };
     xhr.send('idtoken=' + id_token);
 }
-function getCompanyInfo(app) {
+function doCompanyAction(app) {
     return function f(e) {
-        if(e.target.tagName==="LI"){
+        var tag = e.target.tagName;
+        if(tag==="LI"){
             var target = e.target;
             var companyId = target.getAttribute("data-companyId");
             app.currentCompany = companyId;
-            renderCompanylist();
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'bundle/available_list/'+companyId);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+            xhr.addEventListener('load', renderAvailBundleInfo(app));
+            xhr.send();
+            xhr = new XMLHttpRequest();
+            xhr.open('GET', 'bundle/used_list/'+ companyId);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+            xhr.addEventListener('load', renderUsedBundleInfo(app));
+            xhr.send();
+        }else if(tag==="SPAN"){
+            var target = e.target;
+            var companyId = target.closest('li').getAttribute("data-companyId");
+            app.currentCompany = companyId;
+            console.log("span");
+            console.log(companyId);
+            // var xhr = new XMLHttpRequest();
+            // xhr.open('GET', 'bundle/available_list/'+companyId);
+            // xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+            // xhr.addEventListener('load', renderCompanyInfo(app));
+            // xhr.send();
         }
+    }
+}
+function renderAvailBundleInfo(app){
+    return function f(e) {
+        var json = JSON.parse(this.responseText);
+        var bundles = json.bundles;
+        var result = json.result;
+        if(result ==="success"){
+            var html = app.template_bundleList.innerText;
+            var bindTemplate = Handlebars.compile(html);
+            var resultHTML = bundles.reduce(function(prev, next){
+                return prev + bindTemplate(next);
+            },"");
+            app.elem_availBundleList.innerHTML = resultHTML;
+        }else{
+            app.elem_availBundleList.innerHTML = "";
+        }
+
+    }
+}
+function renderUsedBundleInfo(app){
+    return function f(e) {
+        var json = JSON.parse(this.responseText);
+        var bundles = json.bundles;
+        var result = json.result;
+        if(result ==="success"){
+            var html = app.template_bundleList.innerText;
+            var bindTemplate = Handlebars.compile(html);
+            var resultHTML = bundles.reduce(function(prev, next){
+                return prev + bindTemplate(next);
+            },"");
+            app.elem_usedBundleList.innerHTML = resultHTML;
+        }else{
+            app.elem_usedBundleList.innerHTML = "";
+        }
+
     }
 }

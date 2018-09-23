@@ -41,7 +41,6 @@ router.post('/join', function (req, res, next) {
 
 
 router.post('/login', function (req, res, next) {
-    console.log(req.body);
     const {username, password} = req.body;
     passport.authenticate('local-login', {session: false}, (err, user, info) => {
         if (err || !user) {
@@ -78,7 +77,7 @@ router.get('/auth',function (req, res, next) {
             if (err) {
                 res.status(500).json(err);
             }
-            console.log(token);
+
             res.status(200).json({result : "success"})
         ;
     });
@@ -93,8 +92,6 @@ router.post('/google-auth',function (req, res, next) {
             if (err) {
                 res.status(500).json(err);
             }
-            console.log(data);
-            let a =
             res.status(200).json({message : sha256('banana')});
         });
 

@@ -58,13 +58,15 @@ input[type='text'], input[type='password']{
     display: block;
     list-style: none;
     padding-left: 10px;
+    padding-right: 10px;
 }
-.list ul li{
-
+.list ul li:hover{
+  background-color: #bcbcbc;
 
 }
 .list ul span{
   float: right;
+  cursor: pointer;
 
 }
 #hide{
