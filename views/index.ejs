@@ -91,10 +91,27 @@
           <span>X</span>
       </li>
   </script>
+  <script id="availBundleList" type="rv/template">
+      <li data-bundleId="{{id}}">
+          {{file_name}}
+          <span>+</span>
+      </li>
+  </script>
+  <script id="usedBundleList" type="rv/template">
+      <li data-bundleId="{{id}}">
+          {{file_name}}
+          <label class="switch">
+              <input type="checkbox">
+              <span class="slider round"></span>
+          </label>
+          <span>+</span>
+
+      </li>
+  </script>
   <script id="bundleList" type="rv/template">
       <li data-bundleId="{{id}}">
           {{file_name}}
-          <span>X</span>
+          <span>-</span>
       </li>
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>

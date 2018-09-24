@@ -180,7 +180,6 @@ router.get('/available_list/:companyId', function (req, res, next) {
             if (err) {
                 res.status(500).json(err);
             }
-            console.log(req.params.companyId);
             let find_avail_bundle
                 = connection.query("select bundle_id from avail_bundle where company_id = ?", [req.params.companyId], function (err, rows) {
                 if (err) {
@@ -208,8 +207,6 @@ router.get('/available_list/:companyId', function (req, res, next) {
                         let bundle_id = rows[i].bundle_id;
                         bundle_list.push(bundle_id);
                     }
-                    console.log(bundle_list);
-
                     let not_in_avail_bundle = connection.query("select bundle.id, hash,file_name from file_info " +
                         "join bundle on file_info.id = bundle.file_id " +
                         "where bundle.id not in (?)"

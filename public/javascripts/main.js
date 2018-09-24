@@ -18,6 +18,8 @@ window.addEventListener('load', function () {
     var page_upload = document.querySelector('#upload');
     var template_companyList = document.querySelector('#companyList');
     var template_bundleList = document.querySelector('#bundleList');
+    var template_availBundleList = document.querySelector('#availBundleList');
+    var template_usedBundleList = document.querySelector('#availBundleList');
 
     var token = "";
     var app = {
@@ -49,7 +51,9 @@ window.addEventListener('load', function () {
         page_upload: page_upload,
 
         template_companyList: template_companyList,
-        template_bundleList: template_bundleList
+        template_bundleList: template_bundleList,
+        template_availBundleList: template_availBundleList,
+        template_usedBundleList: template_usedBundleList
     };
     input_password.addEventListener('keypress',catchEnter(app));
     input_companyName.addEventListener('keypress',catchEnterAddCompany(app));
@@ -327,7 +331,7 @@ function renderAvailBundleInfo(app){
         var bundles = json.bundles;
         var result = json.result;
         if(result ==="success"){
-            var html = app.template_bundleList.innerText;
+            var html = app.template_availBundleList.innerText;
             var bindTemplate = Handlebars.compile(html);
             var resultHTML = bundles.reduce(function(prev, next){
                 return prev + bindTemplate(next);
@@ -345,7 +349,7 @@ function renderUsedBundleInfo(app){
         var bundles = json.bundles;
         var result = json.result;
         if(result ==="success"){
-            var html = app.template_bundleList.innerText;
+            var html = app.template_usedBundleList.innerText;
             var bindTemplate = Handlebars.compile(html);
             var resultHTML = bundles.reduce(function(prev, next){
                 return prev + bindTemplate(next);
