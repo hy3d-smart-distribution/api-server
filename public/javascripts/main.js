@@ -121,6 +121,7 @@ function uploadNotify(app){
         app.btn_uploadFile.disabled = false;
         app.btn_uploadFile.innerHTML = "업로드";
         app.message_upload.innerHTML = "업로드가 완료되었습니다.";
+        getBundleList(app);
     }
 }
 function getToken(app) {
@@ -142,7 +143,7 @@ function getToken(app) {
                 app.page_login.style.display = 'none';
                 app.page_upload.style.display = 'block';
 
-                getBundleList(app)();
+                getBundleList(app);
                 getCompanyList(app);
 
             }
@@ -170,6 +171,7 @@ function addCompanyNotice(app) {
         result = json.result;
         if(result==="success"){
             app.message_addCompany.innerText = "추가되었습니다.";
+            getCompanyList(app);
         }else if(result==="token_not_valid"){
             app.message_addCompany.innerText = "인증정보가 유효하지 않습니다. 다시 로그인해 주십시오.";
         }
@@ -201,13 +203,13 @@ function renderCompanylist(app){
     }
 }
 function getBundleList(app){
-    return function f(e) {
+
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'bundle/list');
         xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
         xhr.addEventListener('load', renderBundleList(app));
         xhr.send();
-    }
+
 
 }
 function renderBundleList(app) {
@@ -248,7 +250,36 @@ function doUsedBundleAction(app) {
 }
 function doAvailBundleAction(app) {
     return function f(e) {
+        if(e.target.tagName==="SPAN"){
+            var target = e.target.closest('li');
+            var bundleId = target.getAttribute("data-bundleId");
+            var data = JSON.stringify({companyId: app.currentCompany,bundleId: bundleId});
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'bundle/available_list/add');
+            xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.addEventListener('load', notifyAddAvailBundle(app).bind(target.closest('li')));
 
+            xhr.send(data);
+
+        }
+    }
+}
+function notifyAddAvailBundle(app) {
+    return function f(e) {
+        var json = JSON.parse(e.target.responseText);
+        var result = json.result;
+        if(result==="success"){
+            var newBundle = [{id:app.currentCompany,purchase: 0,file_name: this.firstChild.nodeValue}];
+            var html = app.template_usedBundleList.innerText;
+            var bindTemplate = Handlebars.compile(html);
+            var resultHTML = newBundle.reduce(function(prev, next){
+                return prev + bindTemplate(next);
+            },"");
+            app.elem_usedBundleList.innerHTML += resultHTML;
+            app.elem_availBundleList.removeChild(this);
+        }
     }
 }
 
@@ -257,7 +288,7 @@ function deleteBundle(app) {
         if(e.target.tagName==="SPAN"){
             var target = e.target.closest('li');
             var bundleId = target.getAttribute("data-bundleId");
-            
+
         }
     }
 }
@@ -325,16 +356,10 @@ function doCompanyAction(app) {
             var target = e.target;
             var companyId = target.getAttribute("data-companyId");
             app.currentCompany = companyId;
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'bundle/available_list/'+companyId);
-            xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
-            xhr.addEventListener('load', renderAvailBundleInfo(app));
-            xhr.send();
-            xhr = new XMLHttpRequest();
-            xhr.open('GET', 'bundle/used_list/'+ companyId);
-            xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
-            xhr.addEventListener('load', renderUsedBundleInfo(app));
-            xhr.send();
+            getAvailBundle(app);
+            getUsedBundle(app);
+
+
         }else if(tag==="SPAN"){
             var target = e.target;
             var companyId = target.closest('li').getAttribute("data-companyId");
@@ -346,6 +371,21 @@ function doCompanyAction(app) {
         }
     }
 }
+function getAvailBundle(app){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'bundle/available_list/'+app.currentCompany);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+    xhr.addEventListener('load', renderAvailBundleInfo(app));
+    xhr.send();
+}
+function getUsedBundle(app){
+    xhr = new XMLHttpRequest();
+    xhr.open('GET', 'bundle/used_list/'+ app.currentCompany);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+    xhr.addEventListener('load', renderUsedBundleInfo(app));
+    xhr.send();
+}
+
 function renderAvailBundleInfo(app){
     return function f(e) {
         var json = JSON.parse(this.responseText);

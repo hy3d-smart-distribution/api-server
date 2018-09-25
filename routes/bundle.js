@@ -63,7 +63,8 @@ let saveStorage = multer.diskStorage({
                                         throw err;
                                     });
                                 } else if (rows) {
-                                    let get_bundle_id = connection.query('select id from bundle where file_id = ?', [fileId], function (err, rows) {
+                                    let get_bundle_id = connection.query('select id from bundle where file_id = ?', [fileId],
+                                        function (err, rows) {
                                         if (err) {
                                             console.log(err);
                                             connection.rollback(function () {
@@ -172,8 +173,31 @@ router.get('/used_list/:companyId', function (req, res, next) {
     })(req, res, next);
 
 });
-router.post('/used_list/update',function (req,res,next) {
-    
+router.put('/used_list/update',function (req,res,next) {
+    router.post('/upload', function (req, res, next) {
+        passport.authenticate('local-jwt', (err, token) => {
+            if (err) return next(err);
+            if (!token) return res.status(403).json({result: "token_not_valid"});
+            req.login(token, {session: false}, (err) => {
+                if (err) {
+                    res.status(500).json(err);
+                    return;
+                } else {
+                    let update_purchase = connection.query('update avail_bundle set purchase = ? ' +
+                        'where bundle_id = ? and compnay_id = ?',[req.query.purchase, req.query.bundleId, req.query.companyId],
+                    function (err, rows) {
+                        if (err) {
+                            res.status(500).json(err);
+                        }else{
+                            res.status(200).json({result: "success"});
+                        }
+                    });
+                }
+
+            });
+        })(req, res, next);
+
+    });
 });
 
 router.get('/available_list/:companyId', function (req, res, next) {
@@ -190,9 +214,8 @@ router.get('/available_list/:companyId', function (req, res, next) {
                     res.status(500).json(err);
                 } else if (rows.length === 0) {
 
-                    let show_all_bundle = connection.query("select bundle.id as id, purchase, hash, file_name from file_info " +
-                        "join bundle on file_info.id = bundle.file_id " +
-                        "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?"
+                    let show_all_bundle = connection.query("select bundle.id as id, hash, file_name from file_info " +
+                    "join bundle on file_info.id = bundle.file_id"
                         , [req.params.companyId], function (err, rows) {
                             if (err) {
                                 res.status(500).json(err);
@@ -239,7 +262,8 @@ router.post('/available_list/add', function (req, res, next) {
                 if(err){
                     res.status(500).json(err);
                 }else if(rows.length===0){
-                    let insert_bundle_to_company = connection.query('insert into avail_bundle(company_id,bundle_id) values(?,?)', [req.body.companyId, req.body.bundleId], function (err, rows) {
+                    let insert_bundle_to_company = connection.query('insert into avail_bundle(company_id,bundle_id) values(?,?)',
+                        [req.body.companyId, req.body.bundleId], function (err, rows) {
                         if (err) {
                             res.status(500).json(err);
                         } else {
