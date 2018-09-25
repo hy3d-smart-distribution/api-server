@@ -155,7 +155,7 @@ router.get('/used_list/:companyId', function (req, res, next) {
             if (err) {
             res.status(500).json(err);
         }
-        let show_bundle = connection.query("select bundle.id purchase, hash, file_name from file_info " +
+        let show_bundle = connection.query("select bundle.id as id, purchase, hash, file_name from file_info " +
             "join bundle on file_info.id = bundle.file_id " +
             "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?", [req.params.companyId], function (err, rows) {
                 if (err) {
@@ -172,6 +172,10 @@ router.get('/used_list/:companyId', function (req, res, next) {
     })(req, res, next);
 
 });
+router.post('/used_list/update',function (req,res,next) {
+    
+});
+
 router.get('/available_list/:companyId', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
@@ -186,7 +190,7 @@ router.get('/available_list/:companyId', function (req, res, next) {
                     res.status(500).json(err);
                 } else if (rows.length === 0) {
 
-                    let show_all_bundle = connection.query("select bundle.id, purchase, hash, file_name from file_info " +
+                    let show_all_bundle = connection.query("select bundle.id as id, purchase, hash, file_name from file_info " +
                         "join bundle on file_info.id = bundle.file_id " +
                         "join avail_bundle on bundle.id = avail_bundle.bundle_id where company_id = ?"
                         , [req.params.companyId], function (err, rows) {

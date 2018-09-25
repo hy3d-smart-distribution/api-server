@@ -52,24 +52,20 @@
                   <li>b</li>
               </ul>
           </div>
-      </div>
-
-  </div>
-  <div id="company_info" style="display: block">
-      <div class="center">
-          <div class="avail_bundle list">
+          <div id="avail_bundle" class="list">
               <div>추가할 수 있는 번들 리스트</div>
               <ul>
 
               </ul>
           </div>
-          <div class="used_bundle list">
+          <div id="used_bundle" class="list">
               <div>사용중인 번들 리스트</div>
               <ul>
 
               </ul>
           </div>
       </div>
+
   </div>
   <div id="bundle_list" style="display: block">
       <div class="center">
@@ -88,13 +84,13 @@
   <script id="companyList" type="rv/template">
       <li data-companyId="{{id}}">
           {{name}}
-          <span>X</span>
+          <span class="delete">X</span>
       </li>
   </script>
   <script id="availBundleList" type="rv/template">
       <li data-bundleId="{{id}}">
           {{file_name}}
-          <span>+</span>
+          <span class="plus">+</span>
       </li>
   </script>
   <script id="usedBundleList" type="rv/template">
@@ -104,15 +100,15 @@
               <input type="checkbox">
               <span class="slider round"></span>
           </label>
-          <span>+</span>
-
+          <span class="minus">-</span>
       </li>
   </script>
   <script id="bundleList" type="rv/template">
       <li data-bundleId="{{id}}">
           {{file_name}}
-          <span>-</span>
+          <span class="delete">X</span>
       </li>
+
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
   <script type="text/javascript" src="/javascripts/main.js"></script>

@@ -1,25 +1,30 @@
 window.addEventListener('load', function () {
     var elem_companyList = document.querySelector('#company_list ul');
     var elem_bundleList = document.querySelector('#bundle_list .list ul');
-    var elem_availBundleList = document.querySelector('#company_info .avail_bundle ul');
-    var elem_usedBundleList = document.querySelector('#company_info .used_bundle ul');
+    var elem_availBundleList = document.querySelector('#avail_bundle ul');
+    var elem_usedBundleList = document.querySelector('#used_bundle ul');
 
     var btn_login = document.querySelector('#do_login');
     var input_password = document.querySelector('#input_pw');
     var input_companyName = document.querySelector("[name='new_company']");
+
     var message_login = document.querySelector('#login .message');
     var message_upload = document.querySelector('#upload .message');
     var message_addCompany = document.querySelector('#company_add .message');
+
     var btn_getFile = document.querySelector('#get_file');
     var btn_uploadFile = document.querySelector('#upload_file');
     var btn_addCompany = document.querySelector('#company_add button');
+
     var file_input = document.querySelector("#upload input[type='file']");
+
     var page_login = document.querySelector('#login');
     var page_upload = document.querySelector('#upload');
+
     var template_companyList = document.querySelector('#companyList');
     var template_bundleList = document.querySelector('#bundleList');
     var template_availBundleList = document.querySelector('#availBundleList');
-    var template_usedBundleList = document.querySelector('#availBundleList');
+    var template_usedBundleList = document.querySelector('#usedBundleList');
 
     var token = "";
     var app = {
@@ -67,6 +72,16 @@ window.addEventListener('load', function () {
     elem_bundleList.addEventListener('click',doBundleAction(app));
     elem_usedBundleList.addEventListener('click',doUsedBundleAction(app));
     elem_availBundleList.addEventListener('click',doAvailBundleAction(app));
+
+    Handlebars.registerHelper("likes", function (like) {
+        if (like > 4) {
+            return "<span>축하해요 좋아요가 " + like + "개 이상입니다!</span>";
+        } else if (like < 1) {
+            return "아직 아무도 좋아하지 않아요..";
+        } else {
+            return like + "개의 좋아요가 있네요";
+        }
+    });
     
     
 });
@@ -219,6 +234,15 @@ function doBundleAction(app) {
 }
 function doUsedBundleAction(app) {
     return function f(e) {
+        if(e.target.tagName === "INPUT"){
+            var btn_switch = e.target.closest('.switch');
+            if(btn_switch.classList.contains('checked')){
+                btn_switch.classList.remove('checked');
+            }else{
+                btn_switch.classList.add('checked');
+            }
+
+        }
 
     }
 }
@@ -314,14 +338,11 @@ function doCompanyAction(app) {
         }else if(tag==="SPAN"){
             var target = e.target;
             var companyId = target.closest('li').getAttribute("data-companyId");
-            app.currentCompany = companyId;
-            console.log("span");
-            console.log(companyId);
-            // var xhr = new XMLHttpRequest();
-            // xhr.open('GET', 'bundle/available_list/'+companyId);
-            // xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
-            // xhr.addEventListener('load', renderCompanyInfo(app));
-            // xhr.send();
+            var xhr = new XMLHttpRequest();
+            xhr.open('DELETE', 'company/remove?id='+companyId);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+            xhr.addEventListener('load', notifyDeleteCompany(app).bind(target.closest('li')));
+            xhr.send();
         }
     }
 }
@@ -360,4 +381,14 @@ function renderUsedBundleInfo(app){
         }
 
     }
+}
+function notifyDeleteCompany(app) {
+    return function f(e) {
+        var json = JSON.parse(e.target.responseText);
+        var result = json.result;
+        if(result==="success"){
+            app.elem_companyList.removeChild(this);
+        }
+    }
+
 }
