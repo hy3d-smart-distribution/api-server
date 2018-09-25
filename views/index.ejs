@@ -96,7 +96,12 @@
   <script id="usedBundleList" type="rv/template">
       <li data-bundleId="{{id}}">
           {{file_name}}
-          <label class="switch">
+
+          <label class="switch
+          {{#purchases purchase}}
+            {purchase}}
+          {{/purchases}}
+        ">
               <input type="checkbox">
               <span class="slider round"></span>
           </label>
@@ -104,11 +109,10 @@
       </li>
   </script>
   <script id="bundleList" type="rv/template">
-      <li data-bundleId="{{id}}">
+      <li data-bundleId="{{id}}" data-hash="{{hash}}">
           {{file_name}}
           <span class="delete">X</span>
       </li>
-
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
   <script type="text/javascript" src="/javascripts/main.js"></script>

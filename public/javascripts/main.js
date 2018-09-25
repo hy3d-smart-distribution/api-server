@@ -73,13 +73,11 @@ window.addEventListener('load', function () {
     elem_usedBundleList.addEventListener('click',doUsedBundleAction(app));
     elem_availBundleList.addEventListener('click',doAvailBundleAction(app));
 
-    Handlebars.registerHelper("likes", function (like) {
-        if (like > 4) {
-            return "<span>축하해요 좋아요가 " + like + "개 이상입니다!</span>";
-        } else if (like < 1) {
-            return "아직 아무도 좋아하지 않아요..";
+    Handlebars.registerHelper("purchases", function (purchase) {
+        if (purchase === 1) {
+            return "checked";
         } else {
-            return like + "개의 좋아요가 있네요";
+            return "";
         }
     });
     
@@ -231,22 +229,86 @@ function renderBundleList(app) {
 }
 function doBundleAction(app) {
     return function f(e) {
+        var hash = e.target.closest('li').getAttribute('data-hash');
+        var companyId = app.currentCompany;
+        if(e.target.tagName==="SPAN"){
+            var xhr = new XMLHttpRequest();
+            xhr.open('DELETE', 'bundle/remove?hash='+hash);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+            xhr.addEventListener('load', notifyDeleteBundle(app).bind(e.target.closest('li')));
+            xhr.send();
+        }
 
     }
+}
+function notifyDeleteBundle(app) {
+    return function f(e) {
+        var json = JSON.parse(e.target.responseText);
+        var result = json.result;
+        if(result === "success"){
+            app.elem_bundleList.removeChild(this);
+        }
+
+    };
 }
 function doUsedBundleAction(app) {
     return function f(e) {
         if(e.target.tagName === "INPUT"){
+
+            var bundleId = e.target.closest('li').getAttribute('data-bundleId');
+            var companyId = app.currentCompany;
             var btn_switch = e.target.closest('.switch');
             if(btn_switch.classList.contains('checked')){
-                btn_switch.classList.remove('checked');
-            }else{
-                btn_switch.classList.add('checked');
-            }
+                var xhr = new XMLHttpRequest();
+                xhr.open('PUT', 'bundle/used_list/update?purchase=0&bundleId='+bundleId +"&companyId="+companyId);
+                xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+                xhr.addEventListener('load', notifyPurchase(app,0).bind(btn_switch));
+                xhr.send();
 
+            }else{
+                var xhr = new XMLHttpRequest();
+                xhr.open('PUT', 'bundle/used_list/update?purchase=1&bundleId='+bundleId +"&companyId="+companyId);
+                xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+                xhr.addEventListener('load', notifyPurchase(app,1).bind(btn_switch));
+                xhr.send();
+            }
+        }else if(e.target.classList.contains('minus')){
+            var bundleId = e.target.closest('li').getAttribute('data-bundleId');
+            var companyId = app.currentCompany;
+            var xhr = new XMLHttpRequest();
+            xhr.open('DELETE', 'bundle/used_list/remove?bundleId='+bundleId +"&companyId="+companyId);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
+            xhr.addEventListener('load', notifyDeleteUsedBundle(app).bind(e.target.closest('li')));
+            xhr.send();
         }
 
     }
+}
+function notifyDeleteUsedBundle(app){
+    return function f(e) {
+
+        var json=JSON.parse(e.target.responseText);
+        var result = json.result;
+        if(result == "success") {
+            app.elem_usedBundleList.removeChild(this);
+        }
+
+    }
+}
+function notifyPurchase(app,flag) {
+    return function f(e) {
+        var json=JSON.parse(e.target.responseText);
+        var result = json.result;
+        if(result == "success"){
+            if(flag===1){
+                this.classList.add('checked');
+            }else{
+                this.classList.remove('checked');
+            }
+        }
+
+    };
+
 }
 function doAvailBundleAction(app) {
     return function f(e) {
@@ -254,7 +316,6 @@ function doAvailBundleAction(app) {
             var target = e.target.closest('li');
             var bundleId = target.getAttribute("data-bundleId");
             var data = JSON.stringify({companyId: app.currentCompany,bundleId: bundleId});
-            
             var xhr = new XMLHttpRequest();
             xhr.open('POST', 'bundle/available_list/add');
             xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
@@ -293,7 +354,7 @@ function deleteBundle(app) {
     }
 }
 function notifyDelete() {
-    
+
 }
 function getFile(app) {
     return function f(e) {

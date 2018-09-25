@@ -174,17 +174,16 @@ router.get('/used_list/:companyId', function (req, res, next) {
 
 });
 router.put('/used_list/update',function (req,res,next) {
-    router.post('/upload', function (req, res, next) {
-        passport.authenticate('local-jwt', (err, token) => {
-            if (err) return next(err);
-            if (!token) return res.status(403).json({result: "token_not_valid"});
-            req.login(token, {session: false}, (err) => {
-                if (err) {
-                    res.status(500).json(err);
-                    return;
-                } else {
-                    let update_purchase = connection.query('update avail_bundle set purchase = ? ' +
-                        'where bundle_id = ? and compnay_id = ?',[req.query.purchase, req.query.bundleId, req.query.companyId],
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json({result: "token_not_valid"});
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+                return;
+            } else {
+                let update_purchase = connection.query('update avail_bundle set purchase = ? ' +
+                    'where bundle_id = ? and company_id = ?',[req.query.purchase, req.query.bundleId, req.query.companyId],
                     function (err, rows) {
                         if (err) {
                             res.status(500).json(err);
@@ -192,14 +191,33 @@ router.put('/used_list/update',function (req,res,next) {
                             res.status(200).json({result: "success"});
                         }
                     });
-                }
+            }
 
-            });
-        })(req, res, next);
-
-    });
+        });
+    })(req, res, next);
 });
+router.delete('/used_list/remove',function (req,res,next) {
+    passport.authenticate('local-jwt', (err, token) => {
+        if (err) return next(err);
+        if (!token) return res.status(403).json({result: "error", description: "invalid_token"});
+        req.login(token, {session: false}, (err) => {
+            if (err) {
+                res.status(500).json(err);
+            }
+            let delete_avail_bundle = connection.query('delete from avail_bundle ' +
+                'where company_id = ? and bundle_id = ?',[req.query.companyId,req.query.bundleId],function (err,rows) {
+                if(err){
+                    res.status(500).json(err);
+                }else{
+                    res.status(200).json({result: "success", description: "success"});
+                }
+            });
 
+
+        });
+
+    })(req, res, next);
+});
 router.get('/available_list/:companyId', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
@@ -309,7 +327,7 @@ router.post('/upload', function (req, res, next) {
     })(req, res, next);
 
 });
-router.post('/delete',function (req,res,next) {
+router.delete('/remove',function (req,res,next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result: "token_not_valid"});
@@ -318,7 +336,7 @@ router.post('/delete',function (req,res,next) {
 
                 return res.status(500).json(err);
             } else {
-                let hash = req.body.hash;
+                let hash = req.query.hash;
 
                 let find_path = connection.query('select file_name, path from file_info join disk on disk_id = disk.id where hash = ?'
                     ,[hash],function (err,rows) {
@@ -346,7 +364,7 @@ router.post('/delete',function (req,res,next) {
                                     if(err){
                                         throw err;
                                     }else{
-                                        return res.status(200).json({result: "success"});
+                                        return res.status(200).json({result: "success",description:"success"});
                                     }
                                 });
 
