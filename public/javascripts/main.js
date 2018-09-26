@@ -332,7 +332,7 @@ function notifyAddAvailBundle(app) {
         var json = JSON.parse(e.target.responseText);
         var result = json.result;
         if(result==="success"){
-            var newBundle = [{id:app.currentCompany,purchase: 0,file_name: this.firstChild.nodeValue}];
+            var newBundle = [{id:this.getAttribute("data-bundleId"),purchase: 0,file_name: this.firstChild.nodeValue}];
             var html = app.template_usedBundleList.innerText;
             var bindTemplate = Handlebars.compile(html);
             var resultHTML = newBundle.reduce(function(prev, next){

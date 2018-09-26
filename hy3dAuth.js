@@ -87,7 +87,7 @@ module.exports = function (passport) {
                     return done(null, false, {description: 'invalid_username'});
                 } else {
                     let query_2 = connection.query('select member.id as userId ,company.id as companyId, email, member.name as name, company.name as company ' +
-                        'from member join company on company.id = company_id where email= ? and password = ?', [email, sha256(password)],
+                        'from member join company on company.id = company_id where email= ? and password = ? and privilege = 1', [email, sha256(password)],
                         function (err, rows) {
                             if (err) return done(err);
                             if (rows.length) {

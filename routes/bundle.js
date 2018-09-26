@@ -182,15 +182,27 @@ router.put('/used_list/update',function (req,res,next) {
                 res.status(500).json(err);
                 return;
             } else {
-                let update_purchase = connection.query('update avail_bundle set purchase = ? ' +
-                    'where bundle_id = ? and company_id = ?',[req.query.purchase, req.query.bundleId, req.query.companyId],
-                    function (err, rows) {
-                        if (err) {
-                            res.status(500).json(err);
-                        }else{
-                            res.status(200).json({result: "success"});
-                        }
-                    });
+                let check_avail_bundle = connection.query('select id from avail_bundle ' +
+                    'where company_id = ? and bundle_id = ?',[req.query.companyId,req.query.bundleId], function (err,rows) {
+                    if(err){
+                        throw err;
+                    }
+                    if(rows.length===0){
+                        res.status(404).json({result: "error", description:"not_found"});
+                    }else{
+                        let update_purchase = connection.query('update avail_bundle set purchase = ? ' +
+                            'where bundle_id = ? and company_id = ?',[req.query.purchase, req.query.bundleId, req.query.companyId],
+                            function (err, rows) {
+                                if (err) {
+                                    res.status(500).json(err);
+                                }else{
+                                    res.status(200).json({result: "success" ,description: "succss"});
+                                }
+                            });
+                    }
+                });
+
+
             }
 
         });
@@ -204,15 +216,24 @@ router.delete('/used_list/remove',function (req,res,next) {
             if (err) {
                 res.status(500).json(err);
             }
-            let delete_avail_bundle = connection.query('delete from avail_bundle ' +
-                'where company_id = ? and bundle_id = ?',[req.query.companyId,req.query.bundleId],function (err,rows) {
+            let check_avail_bundle = connection.query('select id from avail_bundle ' +
+                'where company_id = ? and bundle_id = ?',[req.query.companyId,req.query.bundleId], function (err,rows) {
                 if(err){
-                    res.status(500).json(err);
+                    throw err;
+                }else if(rows.length===0){
+                    res.status(404).json({result: "error", description: "not_found"});
                 }else{
-                    res.status(200).json({result: "success", description: "success"});
+                    let delete_avail_bundle = connection.query('delete from avail_bundle ' +
+                        'where company_id = ? and bundle_id = ?',[req.query.companyId,req.query.bundleId],function (err,rows) {
+                        if(err){
+                            res.status(500).json(err);
+                        }else{
+                            res.status(200).json({result: "success", description: "success"});
+                        }
+                    });
                 }
-            });
 
+            });
 
         });
 
@@ -221,6 +242,7 @@ router.delete('/used_list/remove',function (req,res,next) {
 router.get('/available_list/:companyId', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
+
         if (!token) return res.status(403).json({result: "error", description: "invlid_token"});
         req.login(token, {session: false}, (err) => {
             if (err) {
@@ -285,7 +307,7 @@ router.post('/available_list/add', function (req, res, next) {
                         if (err) {
                             res.status(500).json(err);
                         } else {
-                            res.status(200).json({result: "success"});
+                            res.status(200).json({result: "success", description: "success"});
                         }
 
                     });
