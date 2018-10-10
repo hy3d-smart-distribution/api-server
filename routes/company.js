@@ -43,6 +43,11 @@ router.get('/list',function (req, res, next) {
         });
     })(req, res, next);
 });
+
+
+
+
+
 router.post('/add',function (req, res, next) {
 
     passport.authenticate('local-jwt', (err, token) => {
