@@ -9,6 +9,7 @@ let config = require('./config')[env];
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client(config.google.CLIENT_ID);
 
 let connection = mysql.createConnection({
     host: config.database.host,
@@ -31,9 +32,40 @@ module.exports = function (passport) {
     });
     passport.use('google-auth', new CustomStrategy(
         function (req, done) {
+            console.log("google-auth");
+            let find_google_email = connection.query('select member.id as userId ,company.id as companyId, email, member.name as name, company.name as company ' +
+                'from member join company on company.id = company_id where email= ?', [req.body.email], function (err, rows) {
+                if (err){
+                    console.log(err);
+                    return done(err);
+                }
+                else if (rows.length) {
+                    return done(null, {
+                        user_id: rows[0].userId,company_id: rows[0].companyId, email: rows[0].email, name: rows[0].name, company: rows[0].company
+                    });
+                }else {
+                    return done(null, false, {description: 'new_email'});
+                }
+
+            });
+
+        }
+    ));
+    passport.use('google-join', new CustomStrategy(
+        function (req, done) {
             let body = req.body;
-            console.log(body);
-            done(null, {id: "1"});
+            let query_2 = connection.query('insert into member(company_id, email, name) values(?, ?, ?) ', [body.company_id, body.email, body.name], function (err, rows) {
+                if (err) {
+                    return done(err);
+                }
+                let query_3 = connection.query('select id from member where email = ?', [body.email], function (err, rows) {
+                    if (err) return done(err);
+                    if (rows.length) {
+                        return done(null, {id: rows[0].id});
+                    }
+                });
+
+            });
 
         }
     ));
@@ -105,4 +137,3 @@ module.exports = function (passport) {
         }
     ));
 };
-

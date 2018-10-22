@@ -8,6 +8,8 @@ let passport = require('passport');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 let mkdir = require('mkdirp');
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client(config.google.CLIENT_ID);
 let connection = mysql.createConnection({
     host: config.database.host,
     port: config.database.port,
@@ -18,6 +20,8 @@ let connection = mysql.createConnection({
 const sha256 = x => crypto.createHash('sha256').update(x, 'utf8').digest('hex');
 connection.connect();
 /* GET users listing. */
+
+
 
 router.post('/join', function (req, res, next) {
     passport.authenticate('local-join',{session: false},function(err,user,info){
@@ -68,7 +72,9 @@ router.post('/login', function (req, res, next) {
     })(req, res);
 
 });
+router.get('/googleauth',function(req,res,next){
 
+});
 router.get('/auth',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
@@ -84,18 +90,41 @@ router.get('/auth',function (req, res, next) {
 
     })(req, res, next);
 });
-router.post('/google-auth',function (req, res, next) {
-    passport.authenticate('google-auth', (err, data) => {
+router.post('/loginGoogle',function (req, res, next) {
+    passport.authenticate('google-auth', (err, user ,info) => {
+        if (err || !user) {
+            if(err){
+                res.status(500).json(err);
+            }else{
+                return res.status(400).json({result: "error", description: info.description });
+            }
+        }else{
+            let info = user;
+            let user_info = {
+                email: user.email,
+                name: user.name,
+                company: user.company
+            };
+            jwt.sign(info, req.app.get('jwt-secret'), (err, token) => {
+                if (err) console.log(err);
+                return res.status(200).json({result: "success",description: "success" ,token, user: user_info});
+            });
+        }
+
+    })(req, res, next);
+});
+router.post('/joinGoogle',function (req, res, next) {
+    passport.authenticate('google-join', (err, data, info) => {
         if (err) return next(err);
-        if (!data) return res.status(403).json("no data");
+        if (!data) return res.status(403).json({result:"error"});
         req.login(data, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
+            }else{
+                res.status(200).json({result: "success"});
             }
-            res.status(200).json({message : sha256('banana')});
+
         });
-
-
     })(req, res, next);
 });
 
@@ -123,5 +152,13 @@ router.get('/refresh', function (req, res,next) {
 
     })(req, res, next);
 });
+async function verify(token,CLIENT_ID) {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const userid = payload['sub'];
+}
 module.exports = router;
 
