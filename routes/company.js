@@ -19,7 +19,9 @@ let connection = mysql.createConnection({
     password: config.database.password,
     database: config.database.dbname
 });
+router.get('/list:name',function (req,res,next) {
 
+});
 router.get('/list',function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);

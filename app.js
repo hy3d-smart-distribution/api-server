@@ -14,6 +14,9 @@ var bundleRouter = require('./routes/bundle');
 var tokenRouter = require('./routes/token');
 var galleryRouter = require('./routes/gallery');
 var companyRouter = require('./routes/company');
+var logRouter = require('./routes/log');
+
+
 var env = 'development';
 var config = require('./config')[env];
 var app = express();
@@ -44,7 +47,7 @@ app.use('/bundle', bundleRouter);
 app.use('/token', tokenRouter);
 app.use('/gallery', galleryRouter);
 app.use('/company', companyRouter);
-
+app.use('/log', logRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

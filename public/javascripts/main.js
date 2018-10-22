@@ -201,13 +201,11 @@ function renderCompanylist(app){
     }
 }
 function getBundleList(app){
-
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'bundle/list');
         xhr.setRequestHeader('Authorization', 'Bearer ' + app.token);
         xhr.addEventListener('load', renderBundleList(app));
         xhr.send();
-
 
 }
 function renderBundleList(app) {
