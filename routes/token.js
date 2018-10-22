@@ -1,4 +1,3 @@
-
 let express = require('express');
 let router = express.Router();
 let mysql = require('mysql');
@@ -22,25 +21,23 @@ connection.connect();
 /* GET users listing. */
 
 
-
 router.post('/join', function (req, res, next) {
-    passport.authenticate('local-join',{session: false},function(err,user,info){
-        if(err) res.status(500).json(err);
-        else if(!user){
+    passport.authenticate('local-join', {session: false}, function (err, user, info) {
+        if (err) res.status(500).json(err);
+        else if (!user) {
             return res.status(401).json({result: "error", description: info.description});
         }
-        else{
+        else {
             req.logIn(user, function (err) {
                 if (err) {
                     console.log(err);
                     return res.status(400).json({message: "error"});
                 }
-
                 return res.json({result: "success", description: "success"});
             })
         }
 
-    })(req,res,next);
+    })(req, res, next);
 });
 
 
@@ -48,10 +45,10 @@ router.post('/login', function (req, res, next) {
     const {username, password} = req.body;
     passport.authenticate('local-login', {session: false}, (err, user, info) => {
         if (err || !user) {
-            if(err){
+            if (err) {
                 return res.status(400).json(err);
-            }else{
-                return res.status(400).json({result: "error", description: info.description });
+            } else {
+                return res.status(400).json({result: "error", description: info.description});
             }
         }
         req.login(user, {session: false}, (err) => {
@@ -66,39 +63,45 @@ router.post('/login', function (req, res, next) {
             };
             jwt.sign(info, req.app.get('jwt-secret'), (err, token) => {
                 if (err) console.log(err);
-                return res.json({result: "success",description: "success" ,token,user: user_info});
+                return res.json({result: "success", description: "success", token, user: user_info});
             });
         });
     })(req, res);
 
 });
-router.get('/googleauth',function(req,res,next){
+router.get('/googleauth', function (req, res, next) {
+    verify(req.query["token"], config.google.CLIENT_ID).then(function (data) {
+        res.status(200).json(data);
+    }).catch(function (error) {
+        console.error(error);
+        res.status(500).json({"error" : "not_valid"});
 
+    });
 });
-router.get('/auth',function (req, res, next) {
+router.get('/auth', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
-        if (!token) return res.status(403).json({result:"error"});
+        if (!token) return res.status(403).json({result: "error"});
         req.login(token, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
             }
 
-            res.status(200).json({result : "success"})
-        ;
-    });
+            res.status(200).json({result: "success"})
+            ;
+        });
 
     })(req, res, next);
 });
-router.post('/loginGoogle',function (req, res, next) {
-    passport.authenticate('google-auth', (err, user ,info) => {
+router.post('/loginGoogle', function (req, res, next) {
+    passport.authenticate('google-auth', (err, user, info) => {
         if (err || !user) {
-            if(err){
+            if (err) {
                 res.status(500).json(err);
-            }else{
-                return res.status(400).json({result: "error", description: info.description });
+            } else {
+                return res.status(400).json({result: "error", description: info.description});
             }
-        }else{
+        } else {
             let info = user;
             let user_info = {
                 email: user.email,
@@ -107,20 +110,20 @@ router.post('/loginGoogle',function (req, res, next) {
             };
             jwt.sign(info, req.app.get('jwt-secret'), (err, token) => {
                 if (err) console.log(err);
-                return res.status(200).json({result: "success",description: "success" ,token, user: user_info});
+                return res.status(200).json({result: "success", description: "success", token, user: user_info});
             });
         }
 
     })(req, res, next);
 });
-router.post('/joinGoogle',function (req, res, next) {
+router.post('/joinGoogle', function (req, res, next) {
     passport.authenticate('google-join', (err, data, info) => {
         if (err) return next(err);
-        if (!data) return res.status(403).json({result:"error"});
+        if (!data) return res.status(403).json({result: "error"});
         req.login(data, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);
-            }else{
+            } else {
                 res.status(200).json({result: "success"});
             }
 
@@ -129,7 +132,7 @@ router.post('/joinGoogle',function (req, res, next) {
 });
 
 
-router.get('/refresh', function (req, res,next) {
+router.get('/refresh', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
         if (err) return next(err);
         if (!token) return res.status(403).json({result: "error"});
@@ -139,10 +142,10 @@ router.get('/refresh', function (req, res,next) {
             }
             let info = {
                 user_id: token.id,
-                company_id : token.company_id,
-                email : token.email,
-                name : token.name,
-                company : token.company
+                company_id: token.company_id,
+                email: token.email,
+                name: token.name,
+                company: token.company
             };
             jwt.sign(info, req.app.get('jwt-secret'), (err, newtoken) => {
                 if (err) console.log(err);
@@ -152,13 +155,20 @@ router.get('/refresh', function (req, res,next) {
 
     })(req, res, next);
 });
-async function verify(token,CLIENT_ID) {
-    const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    const userid = payload['sub'];
+async function verify(token, CLIENT_ID) {
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const userid = payload['sub'];
+        return {"result": "success"};
+    }
+    catch (err) {
+        throw Error(err);
+    }
+
 }
 module.exports = router;
 
