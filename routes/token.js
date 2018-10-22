@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 let mkdir = require('mkdirp');
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(config.google.CLIENT_ID);
+
 let connection = mysql.createConnection({
     host: config.database.host,
     port: config.database.port,
@@ -70,13 +71,7 @@ router.post('/login', function (req, res, next) {
 
 });
 router.get('/googleauth', function (req, res, next) {
-    verify(req.query["token"], config.google.CLIENT_ID).then(function (data) {
-        res.status(200).json(data);
-    }).catch(function (error) {
-        console.error(error);
-        res.status(500).json({"error" : "not_valid"});
 
-    });
 });
 router.get('/auth', function (req, res, next) {
     passport.authenticate('local-jwt', (err, token) => {
@@ -94,7 +89,7 @@ router.get('/auth', function (req, res, next) {
     })(req, res, next);
 });
 router.post('/loginGoogle', function (req, res, next) {
-    passport.authenticate('google-auth', (err, user, info) => {
+    passport.authenticate('google-login', (err, user, info) => {
         if (err || !user) {
             if (err) {
                 res.status(500).json(err);
@@ -119,7 +114,7 @@ router.post('/loginGoogle', function (req, res, next) {
 router.post('/joinGoogle', function (req, res, next) {
     passport.authenticate('google-join', (err, data, info) => {
         if (err) return next(err);
-        if (!data) return res.status(403).json({result: "error"});
+        if (!data) return res.status(403).json({result: "error", description: info.description});
         req.login(data, {session: false}, (err) => {
             if (err) {
                 res.status(500).json(err);

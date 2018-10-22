@@ -30,42 +30,59 @@ module.exports = function (passport) {
         console.log("deserialize");
         done(null, user);
     });
-    passport.use('google-auth', new CustomStrategy(
+    passport.use('google-login', new CustomStrategy(
         function (req, done) {
-            console.log("google-auth");
-            let find_google_email = connection.query('select member.id as userId ,company.id as companyId, email, member.name as name, company.name as company ' +
-                'from member join company on company.id = company_id where email= ?', [req.body.email], function (err, rows) {
-                if (err){
-                    console.log(err);
-                    return done(err);
-                }
-                else if (rows.length) {
-                    return done(null, {
-                        user_id: rows[0].userId,company_id: rows[0].companyId, email: rows[0].email, name: rows[0].name, company: rows[0].company
-                    });
-                }else {
-                    return done(null, false, {description: 'new_email'});
-                }
+            let body = req.body;
+            verify(body.token,config.google.CLIENT_ID).then((token_email)=>{
 
+                if(token_email !== body.email){
+                    return done(null, false, {description: "email_nomatch"});
+                }
+                let find_google_email = connection.query('select member.id as userId ,company.id as companyId, email, member.name as name, company.name as company ' +
+                    'from member join company on company.id = company_id where email= ?', [body.email], function (err, rows) {
+                    if (err){
+                        console.log(err);
+                        return done(err);
+                    }
+                    else if (rows.length) {
+                        return done(null, {
+                            user_id: rows[0].userId,company_id: rows[0].companyId, email: rows[0].email, name: rows[0].name, company: rows[0].company
+                        });
+                    }else {
+                        return done(null, false, {description: 'new_email'});
+                    }
+
+                });
+            }).catch((err)=>{
+                return done(null, false, {description: "invalid_token"});
             });
+
 
         }
     ));
     passport.use('google-join', new CustomStrategy(
         function (req, done) {
             let body = req.body;
-            let query_2 = connection.query('insert into member(company_id, email, name) values(?, ?, ?) ', [body.company_id, body.email, body.name], function (err, rows) {
-                if (err) {
-                    return done(err);
+            verify(body.token,config.google.CLIENT_ID).then((token_email)=>{
+                if(token_email !== body.email){
+                    return done(null, false, {description: "email_nomatch"});
                 }
-                let query_3 = connection.query('select id from member where email = ?', [body.email], function (err, rows) {
-                    if (err) return done(err);
-                    if (rows.length) {
-                        return done(null, {id: rows[0].id});
+                let insert_user = connection.query('insert into member(company_id, email, name) values(?, ?, ?) ', [body.company_id, body.email, body.name], function (err, rows) {
+                    if (err) {
+                        return done(err);
                     }
-                });
+                    let get_user = connection.query('select id from member where email = ?', [body.email], function (err, rows) {
+                        if (err) return done(err);
+                        if (rows.length) {
+                            return done(null, {id: rows[0].id});
+                        }
+                    });
 
+                });
+            }).catch((err)=>{
+                return done(null, false, {description: "invalid_token"});
             });
+
 
         }
     ));
@@ -137,3 +154,18 @@ module.exports = function (passport) {
         }
     ));
 };
+async function verify(token, CLIENT_ID) {
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        // const userid = payload['sub'];
+        return payload.email;
+    }
+    catch (err) {
+        throw Error(err);
+    }
+
+}
