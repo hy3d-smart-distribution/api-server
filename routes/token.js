@@ -94,7 +94,11 @@ router.post('/loginGoogle', function (req, res, next) {
             if (err) {
                 res.status(500).json(err);
             } else {
-                return res.status(400).json({result: "error", description: info.description});
+                if(info.description === "new_email"){
+                    return res.status(200).json({result: "success", description: info.description});
+                }else{
+                    return res.status(400).json({result: "error", description: info.description});
+                }
             }
         } else {
             let info = user;
