@@ -34,7 +34,6 @@ module.exports = function (passport) {
         function (req, done) {
             let body = req.body;
             verify(body.token,config.google.CLIENT_ID).then((token_email)=>{
-
                 if(token_email !== body.email){
                     return done(null, false, {description: "email_nomatch"});
                 }
@@ -44,12 +43,12 @@ module.exports = function (passport) {
                         console.log(err);
                         return done(err);
                     }
-                    else if (rows.length) {
+                    else if (rows.length!==0) {
                         return done(null, {
                             user_id: rows[0].userId,company_id: rows[0].companyId, email: rows[0].email, name: rows[0].name, company: rows[0].company
                         });
                     }else {
-                        return done(null, false, {description: 'new_email'});
+                        return done(null, false,{description: 'new_email'});
                     }
 
                 });
