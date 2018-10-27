@@ -53,6 +53,7 @@ module.exports = function (passport) {
 
                 });
             }).catch((err)=>{
+                console.log(err);
                 return done(null, false, {description: "invalid_token"});
             });
 
