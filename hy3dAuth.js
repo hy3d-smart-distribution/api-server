@@ -67,18 +67,27 @@ module.exports = function (passport) {
                 if(token_email !== body.email){
                     return done(null, false, {description: "email_nomatch"});
                 }
-                let insert_user = connection.query('insert into member(company_id, email, name) values(?, ?, ?) ', [body.company_id, body.email, body.name], function (err, rows) {
-                    if (err) {
-                        return done(err);
+                let find_user = connection.query('select email from member where email=?', [body.email], function (err, rows) {
+                    if(row.length){
+                        return done(null, false, {description: 'email_inuse'});
+                    }else{
+                        let insert_user = connection.query('insert into member(company_id, email, name) values(?, ?, ?) ', [body.company_id, body.email, body.name], function (err, rows) {
+                            if (err) {
+                                return done(err);
+                            }
+                            let get_user = connection.query('select id from member where email = ?', [body.email], function (err, rows) {
+                                if (err) return done(err);
+                                if (rows.length) {
+                                    return done(null, {id: rows[0].id});
+                                }
+                            });
+
+                        });
                     }
-                    let get_user = connection.query('select id from member where email = ?', [body.email], function (err, rows) {
-                        if (err) return done(err);
-                        if (rows.length) {
-                            return done(null, {id: rows[0].id});
-                        }
-                    });
+
 
                 });
+
             }).catch((err)=>{
                 return done(null, false, {description: "invalid_token"});
             });
